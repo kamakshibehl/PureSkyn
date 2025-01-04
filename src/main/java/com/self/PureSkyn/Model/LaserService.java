@@ -1,11 +1,13 @@
 package com.self.PureSkyn.Model;
 
-import java.util.List;
+import lombok.Data;
 
-public class Service {
+@Data
+public class LaserService {
     private int id;
     private String name;
     private String description;
     private String type;
-    private List<Session> timeSlots;
+    private double price;
+    private String[] validPinCodes;
 }
