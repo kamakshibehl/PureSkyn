@@ -1,11 +1,8 @@
 package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.Address;
-import com.self.PureSkyn.Model.User;
 import com.self.PureSkyn.service.AddressService;
-import com.self.PureSkyn.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,32 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/users")
-public class UserController {
-
-    @Autowired
-    UserService userService;
-
+@RequestMapping("/api/v1/users/address")
+public class AddressController {
     @Autowired
     private AddressService addressService;
 
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/address/{userId}")
+    @GetMapping("/{userId}")
     public List<Address> getAddressesByUserId(@PathVariable Integer userId) {
         return addressService.getAddressesByUserId(userId);
-    }
-
-    public void getServices() {
-
-    }
-
-
-    public void bookSession() {
-
     }
 }

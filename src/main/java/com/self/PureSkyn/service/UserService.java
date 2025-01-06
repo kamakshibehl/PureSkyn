@@ -1,7 +1,9 @@
 package com.self.PureSkyn.service;
 
+import com.self.PureSkyn.Model.Address;
 import com.self.PureSkyn.Model.Role;
 import com.self.PureSkyn.Model.User;
+import com.self.PureSkyn.Model.UserSignUpDTO;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.UserRepo;
 import lombok.Data;
@@ -10,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -23,28 +26,19 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-//    public UserService() {
-//
-//    }
-
-    public User registerUser(String username, String email, String rawPassword, boolean isAdmin) {
-        if (userRepo.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
-        }
-        if (userRepo.existsByEmail(email)) {
+    public User registerUser(UserSignUpDTO userSignUpDTO, boolean isAdmin) {
+        if (userRepo.existsByEmail(userSignUpDTO.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
-
         User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setEmail(userSignUpDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
 
         if (isAdmin) {
             user.setRole(Role.ADMIN);
         } else {
             user.setRole(Role.USER);
         }
-
         return userRepo.save(user);
     }
 
@@ -53,4 +47,9 @@ public class UserService implements UserDetailsService {
         Optional<User> user = userRepo.findByUsername(username);
         return user.orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
     }
+
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
+
 }

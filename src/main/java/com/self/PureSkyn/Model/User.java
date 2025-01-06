@@ -1,6 +1,7 @@
 package com.self.PureSkyn.Model;
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,20 +11,16 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-@Document(collation = "users")
+@Document(collection = "users")
 public class User implements UserDetails {
+    @Id
     private int id;
     private String firstName;
     private String lastName;
     private String email;
     private String password;
     private String phone;
-    private String addressLine1;
-    private String addressLine2;
-    private String city;
-    private String state;
-    private String pinCode;
-    private String country;
+    List<Address> addresses;
     private Role role;
 
     @Override

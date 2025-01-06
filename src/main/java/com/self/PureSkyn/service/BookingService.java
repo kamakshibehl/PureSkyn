@@ -1,13 +1,12 @@
 package com.self.PureSkyn.service;
 
 import com.self.PureSkyn.Model.Booking;
-import com.self.PureSkyn.Model.LaserService;
+import com.self.PureSkyn.Model.Facility;
 import com.self.PureSkyn.Model.Technician;
 import com.self.PureSkyn.exception.BadRequestException;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.BookingRepo;
 import com.self.PureSkyn.repository.ServiceRepo;
-import com.self.PureSkyn.repository.TechnicianAvailablityRepo;
 import com.self.PureSkyn.repository.TechnicianRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,11 +66,11 @@ public class BookingService {
             throw new BadRequestException("Cannot book a date in the past");
         }
 
-        LaserService laserService = serviceRepo.findById(booking.getServiceId())
+        Facility facility = serviceRepo.findById(booking.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
         boolean validForService = false;
-        for (String pin : laserService.getValidPinCodes()) {
+        for (String pin : facility.getValidPinCodes()) {
             if (pin.equals(booking.getPinCode())) {
                 validForService = true;
                 break;
@@ -129,7 +128,7 @@ public class BookingService {
         Technician technician = technicianRepo.findById(technicianId)
                 .orElseThrow(() -> new ResourceNotFoundException("Technician not found"));
 
-        LaserService ls = serviceRepo.findById(booking.getServiceId())
+        Facility ls = serviceRepo.findById(booking.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
         if (technician.getAvailablePinCodes() == null
