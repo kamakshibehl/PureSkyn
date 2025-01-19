@@ -8,9 +8,6 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 public interface TechnicianAvailablityRepo extends MongoRepository<TechnicianAvailability, Integer> {
-    Optional<TechnicianAvailability> findByTechnicianIdAndDateAndTimeSlot(
-            int technicianId,
-            LocalDate date,
-            LocalTime timeSlot
-    );
+
+    Optional<TechnicianAvailability> findByTechnicianIdAndDateAndTimeSlot(int technicianId, LocalDate date, LocalTime timeSlot);
 }

@@ -46,4 +46,13 @@ public class TechnicianService {
         ta.setTimeSlot(timeSlot);
         availablityRepo.save(ta);
     }
+
+    public List<Technician> getAvailableTechnicians(String serviceId, LocalDate date, LocalTime timeSlot) {
+        List<Technician> technicians = technicianRepo.findByServiceTypesContaining(serviceId);
+
+        return technicians.stream()
+                .filter(technician -> availablityRepo.findByTechnicianIdAndDateAndTimeSlot(
+                        technician.getId(), date, timeSlot).isEmpty())
+                .toList();
+    }
 }

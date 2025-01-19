@@ -11,11 +11,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@Data
+@Service
 public class UserService implements UserDetailsService {
 
     private final UserRepo userRepo;
@@ -44,12 +45,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepo.findByUsername(username);
-        return user.orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
+        return userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
     }
 
     public List<User> getAllUsers() {
         return userRepo.findAll();
     }
-
 }

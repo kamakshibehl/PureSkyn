@@ -1,46 +1,14 @@
 package com.self.PureSkyn.service;
 
-import com.self.PureSkyn.Model.Booking;
-import com.self.PureSkyn.Model.Facility;
-import com.self.PureSkyn.Model.Technician;
+import com.self.PureSkyn.Model.*;
 import com.self.PureSkyn.exception.BadRequestException;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
-import com.self.PureSkyn.repository.BookingRepo;
-import com.self.PureSkyn.repository.ServiceRepo;
-import com.self.PureSkyn.repository.TechnicianRepo;
+import com.self.PureSkyn.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-
-//@Service
-//public class BookingService {
-//
-//    @Autowired
-//    private BookingRepo bookingRepo;
-//
-//    public Booking createBooking(Booking booking) {
-//        return bookingRepo.save(booking);
-//    }
-//
-//    public List<Booking> getPendingBookings() {
-//        return bookingRepo.getPendingBookings();
-//    }
-//
-//    public Booking assignTechnician(int bookingId, int technicianId) {
-//        Booking booking = bookingRepo.findById(bookingId)
-//                .orElseThrow(() -> new RuntimeException("Booking not found"));
-//        booking.setTechnicianId(technicianId);
-//        booking.setAssigned(true);
-//        return bookingRepo.save(booking);
-//    }
-//
-//    public List<Booking> getBookingsForDate(LocalDate date) {
-//        return bookingRepo.findByDate(date);
-//    }
-//}
-
 
 @Service
 public class BookingService {
@@ -49,13 +17,21 @@ public class BookingService {
     private BookingRepo bookingRepo;
 
     @Autowired
-    private ServiceRepo serviceRepo;
+    private FacilityRepo serviceRepo;
 
     @Autowired
     private TechnicianRepo technicianRepo;
 
+    @Autowired TechnicianAvailablityRepo technicianAvailablityRepo;
+
     @Autowired
     private TechnicianService technicianService;
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private AddressRepo addressRepo;
 
     public Booking createBooking(Booking booking) {
         LocalDate today = LocalDate.now();
@@ -69,110 +45,114 @@ public class BookingService {
         Facility facility = serviceRepo.findById(booking.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
-        boolean validForService = false;
-        for (String pin : facility.getValidPinCodes()) {
-            if (pin.equals(booking.getPinCode())) {
-                validForService = true;
-                break;
-            }
-        }
-        if (!validForService) {
-            throw new BadRequestException("Service is not available in pin code " + booking.getPinCode());
-        }
-
-//        if (booking.getTechnicianId() != null && !booking.getTechnicianId().isBlank()) {
-//            Technician technician = technicianRepo.findById(booking.getTechnicianId())
-//                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found"));
-//
-//            if (technician.getAvailablePinCodes() == null ||
-//                    !technician.getAvailablePinCodes().contains(booking.getPinCode())) {
-//                throw new BadRequestException(
-//                        "Technician does not serve pin code " + booking.getPinCode()
-//                );
-//            }
-//
-//            boolean isAvailable = technicianAvailabilityService.isTechnicianAvailable(
-//                    technician.getId(),
-//                    booking.getDate(),
-//                    booking.getTimeSlot()
-//            );
-//            if (!isAvailable) {
-//                throw new BadRequestException("Technician is not available for that date/time");
-//            }
-//            technicianAvailabilityService.bookSlot(
-//                    technician.getId(),
-//                    booking.getDate(),
-//                    booking.getTimeSlot()
-//            );
-//            booking.setStatus("ASSIGNED");
-//        } else {
-//            booking.setStatus("PENDING");
-//        }
+        booking.setStatus(BookingStatus.PENDING);
 
         return bookingRepo.save(booking);
     }
 
-    public List<Booking> getPendingBookings() {
-        return bookingRepo.findByAssigned(false);
-    }
-
-
     public Booking assignTechnician(int bookingId, int technicianId) {
+
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
-        if (booking.isAssigned()) {
-            throw new BadRequestException("Only UNASSIGNED bookings can be assigned");
+        if (!BookingStatus.PENDING.equals(booking.getStatus())) {
+            throw new BadRequestException("Booking is not in pending status");
         }
 
         Technician technician = technicianRepo.findById(technicianId)
                 .orElseThrow(() -> new ResourceNotFoundException("Technician not found"));
 
-        Facility ls = serviceRepo.findById(booking.getServiceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+        boolean isAvailable = technicianAvailablityRepo.findByTechnicianIdAndDateAndTimeSlot(
+                technicianId, booking.getDate(), booking.getTimeSlot()).isEmpty();
 
-        if (technician.getAvailablePinCodes() == null
-                || !technician.getAvailablePinCodes().contains(booking.getPinCode())) {
-            throw new BadRequestException(
-                    "Technician does not serve pin code " + booking.getPinCode()
-            );
-        }
-
-        boolean validForService = false;
-        for (String pin : ls.getValidPinCodes()) {
-            if (pin.equals(booking.getPinCode())) {
-                validForService = true;
-                break;
-            }
-        }
-        if (!validForService) {
-            throw new BadRequestException(
-                    "Service is not available in pin code " + booking.getPinCode()
-            );
-        }
-
-        boolean isAvailable = technicianService.isTechnicianAvailable(
-                technicianId,
-                booking.getDate(),
-                booking.getTimeSlot()
-        );
         if (!isAvailable) {
-            throw new BadRequestException("Technician is not available for that date/time");
+            throw new BadRequestException("Technician is not available for the selected date and time slot");
         }
-
-        technicianService.bookSlot(
-                technicianId,
-                booking.getDate(),
-                booking.getTimeSlot()
-        );
 
         booking.setTechnicianId(technicianId);
-        booking.setCompleted(true);
-        return bookingRepo.save(booking);
+        booking.setStatus(BookingStatus.ASSIGNED);
+        Booking updatedBooking = bookingRepo.save(booking);
+
+        TechnicianAvailability availability = new TechnicianAvailability();
+        availability.setId(technicianId);
+        availability.setDate(booking.getDate());
+        availability.setTimeSlot(booking.getTimeSlot());
+        technicianAvailablityRepo.save(availability);
+
+        return updatedBooking;
     }
 
-    public List<Booking> getBookingsForDate(LocalDate date) {
-        return bookingRepo.findByDate(date);
+    public List<BookingDTO> getAllPendingBookings() {
+        return bookingRepo.findByStatus(BookingStatus.PENDING)
+                .stream()
+                .map(this::convertToBookingDTO)
+                .toList();
     }
+
+    public List<BookingDTO> getBookingsByDate(LocalDate date) {
+        List<Booking> bookings = bookingRepo.findByDate(date);
+        return bookings.stream()
+                .map(this::convertToBookingDTO)
+                .toList();
+    }
+
+    public List<BookingDTO> getAllBookingsInDescOrder() {
+        List<Booking> bookings = bookingRepo.findAll();
+        return bookings.stream().map(this::convertToBookingDTO).toList();
+    }
+
+    private BookingDTO convertToBookingDTO(Booking booking) {
+        BookingDTO dto = new BookingDTO();
+        dto.setBookingId(booking.getId());
+
+        dto.setServiceName(
+                serviceRepo.findById(booking.getServiceId())
+                        .map(Facility::getName)
+                        .orElse("Unknown Service")
+        );
+
+        dto.setUserName(
+                userRepo.findById(booking.getUserId())
+                        .map(User::getName)
+                        .orElse("Unknown User")
+        );
+
+        dto.setTechnicianName(
+                booking.getTechnicianId() != null
+                        ? technicianRepo.findById(booking.getTechnicianId())
+                        .map(Technician::getName)
+                        .orElse("Unknown Technician")
+                        : "Not Assigned"
+        );
+
+        dto.setAddress(
+                addressRepo.findById(String.valueOf(booking.getAddressId()))
+                        .map(this::formatAddress)
+                        .orElse("Unknown Address")
+        );
+
+        dto.setDate(booking.getDate());
+        dto.setTimeSlot(booking.getTimeSlot());
+        dto.setStatus(BookingStatus.valueOf(booking.getStatus().name())); // Assuming `getStatus()` is an enum
+
+        return dto;
+    }
+
+    private String formatAddress(Address address) {
+        return String.format("%s, %s, %s, %s, %s, %s",
+                address.getAddressLine1(),
+                address.getAddressLine2(),
+                address.getCity(),
+                address.getState(),
+                address.getCountry(),
+                address.getPinCode());
+    }
+
+    public List<BookingDTO> getBookingsByUserId(String userId) {
+        List<Booking> bookings = bookingRepo.findByUserId(userId);
+
+        return bookings.stream().map(this::convertToBookingDTO).toList();
+    }
+
 }
 

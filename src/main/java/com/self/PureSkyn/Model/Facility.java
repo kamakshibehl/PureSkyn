@@ -1,13 +1,63 @@
 package com.self.PureSkyn.Model;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@Document(collection = "services")
 public class Facility {
     private int id;
     private String name;
     private String description;
-    private String type;
+    private String category;
+    private Facility types;
     private double price;
-    //private String[] validPinCodes;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Facility getTypes() {
+        return types;
+    }
+
+    public void setTypes(Facility types) {
+        this.types = types;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
 }

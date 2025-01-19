@@ -13,9 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-@Repository
-public class AddressRepo implements MongoRepository<Address, String> {
-    public List<Address> findByUserId(Integer userId) {
-        return null;
-    }
+public interface AddressRepo extends MongoRepository<Address, String> {
+    List<Address> findByUserId(Integer userId);
 }

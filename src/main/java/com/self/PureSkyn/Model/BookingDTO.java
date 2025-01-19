@@ -1,24 +1,29 @@
 package com.self.PureSkyn.Model;
 
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-@Document(collection = "bookings")
-public class Booking {
+public class BookingDTO {
     private int id;
     private int userId;
+    private String userName;
     private Integer technicianId;
+    private String technicianName;
     private int serviceId;
-    private int addressId;
+    private String serviceName;
+    private String address;
     private String pinCode;
 
     private LocalDate date;
     private LocalTime timeSlot;
     private BookingStatus status;
+
+    public void setBookingId(int id) {
+
+    }
 
     public int getId() {
         return id;
@@ -36,12 +41,28 @@ public class Booking {
         this.userId = userId;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public Integer getTechnicianId() {
         return technicianId;
     }
 
     public void setTechnicianId(Integer technicianId) {
         this.technicianId = technicianId;
+    }
+
+    public String getTechnicianName() {
+        return technicianName;
+    }
+
+    public void setTechnicianName(String technicianName) {
+        this.technicianName = technicianName;
     }
 
     public int getServiceId() {
@@ -52,12 +73,20 @@ public class Booking {
         this.serviceId = serviceId;
     }
 
-    public int getAddressId() {
-        return addressId;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setAddressId(int addressId) {
-        this.addressId = addressId;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getPinCode() {
