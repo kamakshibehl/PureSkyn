@@ -1,7 +1,9 @@
 package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.Booking;
+import com.self.PureSkyn.Model.BookingDTO;
 import com.self.PureSkyn.Model.Technician;
+import com.self.PureSkyn.Model.TechnicianDTO;
 import com.self.PureSkyn.exception.BadRequestException;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.service.BookingService;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,7 +20,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/v1/admin")
 public class AdminController {
 
     @Autowired
@@ -27,10 +30,11 @@ public class AdminController {
     private TechnicianService technicianService;
 
     @PutMapping("/{bookingId}/assignTechnician")
-    public ResponseEntity<?> assignTechnician(@PathVariable int bookingId,
-                                              @RequestParam int technicianId) {
+    @PreAuthorize("@adminService.isCurrentUserAdmin()")
+    public ResponseEntity<?> assignTechnician(@PathVariable String bookingId,
+                                              @RequestParam String technicianId) {
         try {
-            Booking updatedBooking = bookingService.assignTechnician(bookingId, technicianId);
+            BookingDTO updatedBooking = bookingService.assignTechnician(bookingId, technicianId);
             return ResponseEntity.ok(updatedBooking);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -40,12 +44,13 @@ public class AdminController {
     }
 
     @GetMapping("/available-technicians")
+    @PreAuthorize("@adminService.isCurrentUserAdmin()")
     public ResponseEntity<?> getAvailableTechnicians(
             @RequestParam("serviceId") String serviceId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("timeSlot") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timeSlot) {
 
-        List<Technician> availableTechnicians = technicianService.getAvailableTechnicians(serviceId, date, timeSlot);
+        List<TechnicianDTO> availableTechnicians = technicianService.getAvailableTechnicians(serviceId, date, timeSlot);
 
         if (availableTechnicians.isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK).body("No technicians available");

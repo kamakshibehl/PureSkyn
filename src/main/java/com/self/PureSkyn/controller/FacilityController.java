@@ -27,7 +27,7 @@ public class FacilityController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@adminService.isCurrentUserAdmin()")
     public ResponseEntity<Facility> createService(@RequestBody Facility facility) {
         try {
             Facility createdFacility = facilityService.createFacility(facility);

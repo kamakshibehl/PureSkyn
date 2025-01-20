@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -33,6 +35,29 @@ public class BookingService {
     @Autowired
     private AddressRepo addressRepo;
 
+    public PriceDetailsDTO requestBooking(String serviceId, LocalDate date, LocalTime timeSlot) {
+        LocalDate today = LocalDate.now();
+        if (date == null || timeSlot == null) {
+            throw new BadRequestException("Date and timeSlot must be specified");
+        }
+        if (date.isBefore(today)) {
+            throw new BadRequestException("Cannot book a date in the past");
+        }
+
+        Facility facility = serviceRepo.findById(serviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+
+        boolean technicianAvailable = technicianService.isTechnicianAvailable(serviceId, date, timeSlot);
+        if (!technicianAvailable) {
+            throw new BadRequestException("No technicians are available for the selected time slot");
+        }
+
+        double halfPrice = facility.getPrice() * 0.5;
+        double fullPrice = facility.getPrice();
+
+        return new PriceDetailsDTO(halfPrice, fullPrice);
+    }
+
     public Booking createBooking(Booking booking) {
         LocalDate today = LocalDate.now();
         if (booking.getDate() == null || booking.getTimeSlot() == null) {
@@ -45,12 +70,24 @@ public class BookingService {
         Facility facility = serviceRepo.findById(booking.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
+        double requiredPayment = facility.getPrice() * 0.5;
+        Payment paymentDetails = booking.getPayment();
+
+        if (paymentDetails == null || paymentDetails.getAmountPaid() < requiredPayment) {
+            throw new BadRequestException("At least 50% payment is required to book the service");
+        }
+
+        paymentDetails.setBookingId(booking.getId());
+        paymentDetails.setFullPayment(paymentDetails.getAmountPaid() >= facility.getPrice());
+        paymentDetails.setPaymentDate(LocalDateTime.now());
+
         booking.setStatus(BookingStatus.PENDING);
+        booking.setPayment(paymentDetails);
 
         return bookingRepo.save(booking);
     }
 
-    public Booking assignTechnician(int bookingId, int technicianId) {
+    public BookingDTO assignTechnician(String bookingId, String technicianId) {
 
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
@@ -79,7 +116,7 @@ public class BookingService {
         availability.setTimeSlot(booking.getTimeSlot());
         technicianAvailablityRepo.save(availability);
 
-        return updatedBooking;
+        return updatedBooking.stream().map(this::convertToBookingDTO).toList();
     }
 
     public List<BookingDTO> getAllPendingBookings() {
@@ -103,7 +140,7 @@ public class BookingService {
 
     private BookingDTO convertToBookingDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
-        dto.setBookingId(booking.getId());
+        dto.setId(booking.getId());
 
         dto.setServiceName(
                 serviceRepo.findById(booking.getServiceId())
@@ -154,5 +191,28 @@ public class BookingService {
         return bookings.stream().map(this::convertToBookingDTO).toList();
     }
 
+    public Booking markBookingAsCompleted(String bookingId) {
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (BookingStatus.COMPLETED.equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking is already completed");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        return bookingRepo.save(booking);
+    }
+
+    public Booking markBookingAsCancelled(String bookingId) {
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (BookingStatus.CANCELLED.equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking is already canceled");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        return bookingRepo.save(booking);
+    }
 }
 

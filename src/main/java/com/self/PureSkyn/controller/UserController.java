@@ -24,22 +24,8 @@ public class UserController {
     private AddressService addressService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@adminService.isCurrentUserAdmin()")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
-    }
-
-    @GetMapping("/address/{userId}")
-    public List<Address> getAddressesByUserId(@PathVariable Integer userId) {
-        return addressService.getAddressesByUserId(userId);
-    }
-
-    public void getServices() {
-
-    }
-
-
-    public void bookSession() {
-
     }
 }

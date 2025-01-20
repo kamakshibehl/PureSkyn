@@ -12,7 +12,7 @@ public class AddressService {
     @Autowired
     private AddressRepo addressRepo;
 
-    public List<Address> getAddressesByUserId(Integer userId) {
+    public List<Address> getAddressesByUserId(String userId) {
         return addressRepo.findByUserId(userId);
     }
 }

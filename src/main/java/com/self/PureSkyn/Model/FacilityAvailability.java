@@ -6,20 +6,18 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
-
+@Data
 @Getter
 @Setter
-@Data
-@Document(collection = "services")
-public class Facility {
+@Document(collection = "facility_availability")
+public class FacilityAvailability {
     @Id
     private String id;
-    private String name;
-    private String description;
-    private String category;
-    private List<Facility> types;
-    private double price;
-    private String duration;
+    private String serviceId;
+    private LocalDate date;
+    private List<LocalTime> unavailableSlots;
 }

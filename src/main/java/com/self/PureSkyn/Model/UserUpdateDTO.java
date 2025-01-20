@@ -4,25 +4,19 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Data
 @Getter
 @Setter
-@Document(collection = "technicians")
-public class Technician {
+@Data
+public class UserUpdateDTO {
     @Id
     private String id;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
     private String phone;
-    private List<String> serviceTypes;
-
-    public String getName() {
-        return firstName + " " + lastName;
-    }
+    private String gender;
+    private List<Address> addresses;
 }

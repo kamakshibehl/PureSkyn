@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface BookingRepo extends MongoRepository<Booking, Integer> {
+public interface BookingRepo extends MongoRepository<Booking, String> {
 
     List<Booking> findByDate(LocalDate date);
 

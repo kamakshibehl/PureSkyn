@@ -1,17 +1,21 @@
 package com.self.PureSkyn.Model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@Getter
+@Setter
 @Document(collection = "admins")
 public class Admin {
     @Id
-    private int id;
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private Role role = Role.ADMIN;
+    private String phone;
 }

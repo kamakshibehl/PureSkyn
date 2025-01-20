@@ -1,94 +1,30 @@
 package com.self.PureSkyn.Model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@Getter
+@Setter
 @Data
 @Document(collection = "bookings")
 public class Booking {
-    private int id;
-    private int userId;
-    private Integer technicianId;
-    private int serviceId;
-    private int addressId;
+    @Id
+    private String id;
+    private String userId;
+    private String technicianId;
+    private String serviceId;
+
+    private String addressId;
     private String pinCode;
+    private Payment payment;
 
     private LocalDate date;
     private LocalTime timeSlot;
     private BookingStatus status;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public Integer getTechnicianId() {
-        return technicianId;
-    }
-
-    public void setTechnicianId(Integer technicianId) {
-        this.technicianId = technicianId;
-    }
-
-    public int getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(int serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public int getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(int addressId) {
-        this.addressId = addressId;
-    }
-
-    public String getPinCode() {
-        return pinCode;
-    }
-
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getTimeSlot() {
-        return timeSlot;
-    }
-
-    public void setTimeSlot(LocalTime timeSlot) {
-        this.timeSlot = timeSlot;
-    }
-
-    public BookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BookingStatus status) {
-        this.status = status;
-    }
 }
