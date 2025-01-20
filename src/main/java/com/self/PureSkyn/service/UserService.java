@@ -4,6 +4,8 @@ import com.self.PureSkyn.Model.*;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.UserRepo;
 import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -18,21 +21,14 @@ public class UserService implements UserDetailsService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private BookingService bookingService;
+
     public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void registerUser(UserSignUpDTO userSignUpDTO) {
-        if (userRepo.existsByEmail(userSignUpDTO.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
-        User user = new User();
-        user.setEmail(userSignUpDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
-
-        userRepo.save(user);
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -40,8 +36,10 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
     }
 
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    public List<UserDetailsDTO> getAllUserDetails() {
+        List<User> users = userRepo.findAll();
+
+        return users.stream().map(this::convertToUserDetailsDTO).collect(Collectors.toList());
     }
 
     public UserUpdateDTO updateUserProfile(int id, UserUpdateDTO updateRequest) {
@@ -96,5 +94,20 @@ public class UserService implements UserDetailsService {
         return dto;
     }
 
+    private UserDetailsDTO convertToUserDetailsDTO(User user) {
 
+        List<BookingDTO> bookings = bookingService.getBookingsByUserId(user.getId());
+
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
+        userDetailsDTO.setId(user.getId());
+        userDetailsDTO.setFirstName(user.getFirstName());
+        userDetailsDTO.setLastName(user.getLastName());
+        userDetailsDTO.setEmail(user.getEmail());
+        userDetailsDTO.setPhone(user.getPhone());
+        userDetailsDTO.setGender(user.getGender());
+        userDetailsDTO.setAddresses(user.getAddresses());
+        userDetailsDTO.setBookings(bookings);
+
+        return userDetailsDTO;
+    }
 }

@@ -1,38 +1,134 @@
 package com.self.PureSkyn.service;
 
+import com.self.PureSkyn.Model.LoginRequestDTO;
+import com.self.PureSkyn.Model.User;
+import com.self.PureSkyn.Model.UserLoginDTO;
+import com.self.PureSkyn.Model.UserSignUpDTO;
+import com.self.PureSkyn.exception.ResourceNotFoundException;
+import com.self.PureSkyn.repository.UserRepo;
+import com.self.PureSkyn.security.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
 
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    @Autowired
-//    private AdminRepository adminRepository;
-//
-//    public User registerUser(User user) {
-//        return userRepository.save(user);
-//    }
-//
-//    public Admin registerAdmin(Admin admin) {
-//        return adminRepository.save(admin);
-//    }
-//
-//    public User loginUser(String username, String password) {
-//        User user = userRepository.findByUsername(username);
-//        if(user != null && user.getPassword().equals(password)) {
-//            return user;
-//        }
-//        return null;
-//    }
-//
-//    public Admin loginAdmin(String username, String password) {
-//        Admin admin = adminRepository.findByUsername(username);
-//        if(admin != null && admin.getPassword().equals(password)) {
-//            return admin;
-//        }
-//        return null;
-//    }
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsServiceImpl;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${app.domain.url}")
+    private String domainUrl;
+
+    public UserLoginDTO registerUser(UserSignUpDTO userSignUpDTO) {
+        if (userRepo.existsByEmail(userSignUpDTO.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setEmail(userSignUpDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
+        user.setFirstName(userSignUpDTO.getFirstName());
+        user.setLastName(userSignUpDTO.getLastName());
+        user.setPhone(userSignUpDTO.getPhone());
+
+        userRepo.save(user);
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
+        String jwt = jwtUtils.generateToken(userDetails);
+
+        return new UserLoginDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getPhone(),
+                jwt
+        );
+    }
+
+    public UserLoginDTO authenticateUser(LoginRequestDTO loginRequest) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequest.getEmail());
+        User user = userRepo.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        String jwt = jwtUtils.generateToken(userDetails);
+
+        return new UserLoginDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getPhone(),
+                jwt
+        );
+    }
+
+    public String requestPasswordChange(String email) {
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("User not found.");
+        }
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("purpose", "password-reset");
+        String token = jwtUtils.generateToken(claims, userDetails);
+
+        String passwordChangeLink = domainUrl + "/change-password?token=" + token;
+
+        emailService.sendEmail(
+                email,
+                "Password Change Request",
+                "Hello,\n\nClick the link below to change your password:\n\n" + passwordChangeLink + "\n\nIf you did not request this, please ignore this email."
+        );
+
+        return "Password change link sent to your email.";
+    }
+
+    public String changePassword(String token, String oldPassword, String newPassword) {
+        String email = jwtUtils.extractUsername(token);
+
+        if (!jwtUtils.validateToken(token, email)) {
+            throw new IllegalArgumentException("Invalid or expired token");
+        }
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+
+        return "Password changed successfully.";
+    }
 }
 

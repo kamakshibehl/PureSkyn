@@ -1,12 +1,10 @@
 package com.self.PureSkyn.controller;
 
-import com.self.PureSkyn.Model.User;
-import com.self.PureSkyn.Model.UserLoginDTO;
-import com.self.PureSkyn.Model.UserSignUpDTO;
-import com.self.PureSkyn.Model.UserUpdateDTO;
+import com.self.PureSkyn.Model.*;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.UserRepo;
 import com.self.PureSkyn.security.JwtUtils;
+import com.self.PureSkyn.service.AuthService;
 import com.self.PureSkyn.service.EmailService;
 import com.self.PureSkyn.service.UserDetailsServiceImpl;
 import com.self.PureSkyn.service.UserService;
@@ -48,96 +46,62 @@ public class AuthController {
     private EmailService emailService;
 
     @Autowired
+    AuthService authService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Value("${app.domain.url}")
     private String domainUrl;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserSignUpDTO userDTO) {
-        userService.registerUser(userDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+    public ResponseEntity<UserLoginDTO> registerUser(@RequestBody UserSignUpDTO userDTO) {
+        UserLoginDTO userLoginDTO = authService.registerUser(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userLoginDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
-            );
-
-            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-            User user = userRepo.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            String jwt = jwtUtils.generateToken(userDetails);
-
-            UserLoginDTO response = new UserLoginDTO(user.getId(), user.getEmail(), jwt);
-
-            return ResponseEntity.ok(response);
+            UserLoginDTO userLoginDTO = authService.authenticateUser(loginRequest);
+            return ResponseEntity.ok(userLoginDTO);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
 
     @PostMapping("/request-password-change")
     public ResponseEntity<?> requestPasswordChange(@RequestParam String email) {
         try {
-
-            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-            if (userDetails == null) {
-                return ResponseEntity.status(404).body("User not found.");
-            }
-
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("purpose", "password-reset");
-            String token = jwtUtils.generateToken(claims, userDetails);
-
-            String passwordChangeLink = domainUrl + "/change-password?token=" + token;
-
-            emailService.sendEmail(
-                    email,
-                    "Password Change Request",
-                    "Hello,\n\nClick the link below to change your password:\n\n" + passwordChangeLink + "\n\nIf you did not request this, please ignore this email."
-            );
-
-            return ResponseEntity.ok("Password change link sent to your email.");
+            String responseMessage = authService.requestPasswordChange(email);
+            return ResponseEntity.ok(responseMessage);
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(404).body("User not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while processing the request.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
         }
     }
+
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String token,
                                             @RequestParam String oldPassword,
                                             @RequestParam String newPassword) {
         try {
-
-            String email = jwtUtils.extractUsername(token);
-
-            if (!jwtUtils.validateToken(token, email)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token");
-            }
-
-            User user = userRepo.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password is incorrect");
-            }
-
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepo.save(user);
-
-            return ResponseEntity.ok("Password changed successfully.");
+            String responseMessage = authService.changePassword(token, oldPassword, newPassword);
+            return ResponseEntity.ok(responseMessage);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while changing the password.");
         }
     }
+
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody UserUpdateDTO updateRequest) {

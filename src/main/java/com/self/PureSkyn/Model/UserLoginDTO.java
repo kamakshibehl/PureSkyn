@@ -12,11 +12,15 @@ public class UserLoginDTO {
     @Id
     private String Id;
     private String email;
+    private String name;
+    private String phone;
     private String token;
 
-    public UserLoginDTO(String id, String email, String token) {
+    public UserLoginDTO(String id, String email, String name, String phone, String token) {
         this.Id = id;
         this.email = email;
+        this.name = name;
+        this.phone = phone;
         this.token = token;
     }
 }

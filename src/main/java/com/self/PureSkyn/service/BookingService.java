@@ -116,7 +116,7 @@ public class BookingService {
         availability.setTimeSlot(booking.getTimeSlot());
         technicianAvailablityRepo.save(availability);
 
-        return updatedBooking.stream().map(this::convertToBookingDTO).toList();
+        return convertToBookingDTO(updatedBooking);
     }
 
     public List<BookingDTO> getAllPendingBookings() {

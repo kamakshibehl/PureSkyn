@@ -2,6 +2,7 @@ package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.Address;
 import com.self.PureSkyn.Model.User;
+import com.self.PureSkyn.Model.UserDetailsDTO;
 import com.self.PureSkyn.service.AddressService;
 import com.self.PureSkyn.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class UserController {
 
     @GetMapping("/all")
     @PreAuthorize("@adminService.isCurrentUserAdmin()")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserDetailsDTO> getAllUsers() {
+        return userService.getAllUserDetails();
     }
 }
