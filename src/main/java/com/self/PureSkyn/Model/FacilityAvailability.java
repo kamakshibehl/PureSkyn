@@ -20,4 +20,36 @@ public class FacilityAvailability {
     private String serviceId;
     private LocalDate date;
     private List<LocalTime> unavailableSlots;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public List<LocalTime> getUnavailableSlots() {
+        return unavailableSlots;
+    }
+
+    public void setUnavailableSlots(List<LocalTime> unavailableSlots) {
+        this.unavailableSlots = unavailableSlots;
+    }
 }

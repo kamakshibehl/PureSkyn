@@ -10,6 +10,7 @@ import com.self.PureSkyn.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,12 +45,15 @@ public class AuthService {
     private String domainUrl;
 
     public UserLoginDTO registerUser(UserSignUpDTO userSignUpDTO) {
-        if (userRepo.existsByEmail(userSignUpDTO.getEmail())) {
+
+        String normalizedEmail = userSignUpDTO.getEmail().toLowerCase();
+
+        if (userRepo.existsByEmail(normalizedEmail)) {
             throw new RuntimeException("Email already exists");
         }
 
         User user = new User();
-        user.setEmail(userSignUpDTO.getEmail());
+        user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
         user.setFirstName(userSignUpDTO.getFirstName());
         user.setLastName(userSignUpDTO.getLastName());
@@ -70,20 +74,20 @@ public class AuthService {
     }
 
     public UserLoginDTO authenticateUser(LoginRequestDTO loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-        );
-
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequest.getEmail());
         User user = userRepo.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
         String jwt = jwtUtils.generateToken(userDetails);
 
         return new UserLoginDTO(
                 user.getId(),
                 user.getEmail(),
-                user.getName(),
+                user.getFirstName() + " " + user.getLastName(),
                 user.getPhone(),
                 jwt
         );
@@ -108,7 +112,7 @@ public class AuthService {
                 "Hello,\n\nClick the link below to change your password:\n\n" + passwordChangeLink + "\n\nIf you did not request this, please ignore this email."
         );
 
-        return "Password change link sent to your email.";
+        return "Password check link sent to your email.";
     }
 
     public String changePassword(String token, String oldPassword, String newPassword) {

@@ -6,6 +6,7 @@ import com.self.PureSkyn.repository.UserRepo;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,25 +17,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final BookingService bookingService;
 
     @Autowired
-    private BookingService bookingService;
-
-    public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder, @Lazy BookingService bookingService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.bookingService = bookingService;
     }
 
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepo.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
-    }
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return userRepo.findByUsername(username)
+//                .orElseThrow(() -> new ResourceNotFoundException("Username not found: " + username));
+//    }
 
     public List<UserDetailsDTO> getAllUserDetails() {
         List<User> users = userRepo.findAll();
@@ -42,7 +43,7 @@ public class UserService implements UserDetailsService {
         return users.stream().map(this::convertToUserDetailsDTO).collect(Collectors.toList());
     }
 
-    public UserUpdateDTO updateUserProfile(int id, UserUpdateDTO updateRequest) {
+    public UserUpdateDTO updateUserProfile(String id, UserUpdateDTO updateRequest) {
             User user = userRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
             if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {

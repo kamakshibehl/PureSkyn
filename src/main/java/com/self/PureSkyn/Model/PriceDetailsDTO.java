@@ -13,4 +13,20 @@ public class PriceDetailsDTO {
 
     public PriceDetailsDTO(double halfPrice, double fullPrice) {
     }
+
+    public double getHalfPrice() {
+        return halfPrice;
+    }
+
+    public void setHalfPrice(double halfPrice) {
+        this.halfPrice = halfPrice;
+    }
+
+    public double getFullPrice() {
+        return fullPrice;
+    }
+
+    public void setFullPrice(double fullPrice) {
+        this.fullPrice = fullPrice;
+    }
 }

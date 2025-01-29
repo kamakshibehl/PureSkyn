@@ -27,8 +27,8 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+//    @Autowired
+//    private UserService userService;
 
     @Autowired
     private UserRepo userRepo;
@@ -53,6 +53,13 @@ public class AuthController {
 
     @Value("${app.domain.url}")
     private String domainUrl;
+
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<UserLoginDTO> registerUser(@RequestBody UserSignUpDTO userDTO) {
@@ -104,7 +111,7 @@ public class AuthController {
 
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody UserUpdateDTO updateRequest) {
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody UserUpdateDTO updateRequest) {
         try {
             UserUpdateDTO updatedUser = userService.updateUserProfile(id, updateRequest);
             return ResponseEntity.ok(updatedUser);
