@@ -20,6 +20,8 @@ public class BookingDTO {
     private String technicianName;
     private String serviceId;
     private String serviceName;
+    private String subServiceId;
+    private String subServiceName;
     private String address;
     private String pinCode;
     private Payment payment;
@@ -27,6 +29,22 @@ public class BookingDTO {
     private LocalDate date;
     private LocalTime timeSlot;
     private BookingStatus status;
+
+    public String getSubServiceId() {
+        return subServiceId;
+    }
+
+    public void setSubServiceId(String subServiceId) {
+        this.subServiceId = subServiceId;
+    }
+
+    public String getSubServiceName() {
+        return subServiceName;
+    }
+
+    public void setSubServiceName(String subServiceName) {
+        this.subServiceName = subServiceName;
+    }
 
     public LocalDate getDate() {
         return date;

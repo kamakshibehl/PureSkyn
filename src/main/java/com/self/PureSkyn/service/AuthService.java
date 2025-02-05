@@ -48,10 +48,6 @@ public class AuthService {
 
         String normalizedEmail = userSignUpDTO.getEmail().toLowerCase();
 
-        if (userRepo.existsByEmail(normalizedEmail)) {
-            throw new RuntimeException("Email already exists");
-        }
-
         User user = new User();
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
@@ -96,9 +92,9 @@ public class AuthService {
     public String requestPasswordChange(String email) {
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-        if (userDetails == null) {
-            throw new UsernameNotFoundException("User not found.");
-        }
+//        if (userDetails == null) {
+//            throw new UsernameNotFoundException("User not found.");
+//        }
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("purpose", "password-reset");
@@ -112,7 +108,7 @@ public class AuthService {
                 "Hello,\n\nClick the link below to change your password:\n\n" + passwordChangeLink + "\n\nIf you did not request this, please ignore this email."
         );
 
-        return "Password check link sent to your email.";
+        return "Password change link sent to your email.";
     }
 
     public String changePassword(String token, String oldPassword, String newPassword) {

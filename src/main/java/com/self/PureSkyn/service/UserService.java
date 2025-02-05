@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,43 +45,45 @@ public class UserService {
     }
 
     public UserUpdateDTO updateUserProfile(String id, UserUpdateDTO updateRequest) {
-            User user = userRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-            if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {
-                if (userRepo.existsByEmail(updateRequest.getEmail())) {
-                    throw new IllegalArgumentException("Email already exists");
-                }
-                user.setEmail(updateRequest.getEmail());
-            }
+//        if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {
+//            if (userRepo.existsByEmail(updateRequest.getEmail())) {
+//                throw new IllegalArgumentException("Email already exists");
+//            }
+//            user.setEmail(updateRequest.getEmail());
+//        }
+//
+//        if (updateRequest.getPhone() != null && !updateRequest.getPhone().equals(user.getPhone())) {
+//            if (userRepo.existsByPhone(updateRequest.getPhone())) {
+//                throw new IllegalArgumentException("Phone number already exists");
+//            }
+//            user.setPhone(updateRequest.getPhone());
+//        }
 
-            if (updateRequest.getPhone() != null && !updateRequest.getPhone().equals(user.getPhone())) {
-                if (userRepo.existsByPhone(updateRequest.getPhone())) {
-                    throw new IllegalArgumentException("Phone number already exists");
-                }
-                user.setPhone(updateRequest.getPhone());
-            }
+        if (StringUtils.hasText(updateRequest.getFirstName())) {
+            user.setFirstName(updateRequest.getFirstName());
+        }
+        if (StringUtils.hasText(updateRequest.getLastName())) {
+            user.setLastName(updateRequest.getLastName());
+        }
+        if (StringUtils.hasText(updateRequest.getGender())) {
+            user.setGender(updateRequest.getGender());
+        }
 
-            if (updateRequest.getFirstName() != null) {
-                user.setFirstName(updateRequest.getFirstName());
+        if (updateRequest.getAddresses() != null && !updateRequest.getAddresses().isEmpty()) {
+            if (user.getAddresses() == null) {
+                user.setAddresses(new ArrayList<>());
             }
-            if (updateRequest.getLastName() != null) {
-                user.setLastName(updateRequest.getLastName());
-            }
-            if (updateRequest.getGender() != null) {
-                user.setGender(updateRequest.getGender());
-            }
-
-            if (updateRequest.getAddresses() != null && !updateRequest.getAddresses().isEmpty()) {
-                if (user.getAddresses() == null) {
-                    user.setAddresses(new ArrayList<>());
-                }
-                user.getAddresses().addAll(updateRequest.getAddresses());
-            }
+            user.getAddresses().addAll(updateRequest.getAddresses());
+        }
 
         User updatedUser = userRepo.save(user);
 
         return convertToUserUpdateDTO(updatedUser);
-        }
+    }
+
 
 
     private UserUpdateDTO convertToUserUpdateDTO(User user) {

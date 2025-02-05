@@ -4,40 +4,33 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
-
 
 @Getter
 @Setter
 @Data
-@Document(collection = "services")
-public class Facility {
-    @Id
-    private String id;
-    private String serviceId;
+public class FacilityTypes {
+    private String subServiceId;
     private String name;
     private String description;
-    private String category;
-    private List<FacilityTypes> types;
     private double price;
     private String duration;
 
-    public String getId() {
-        return id;
+    public FacilityTypes(String subServiceId, String name, String description, double price, String duration) {
+        this.subServiceId = subServiceId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getSubServiceId() {
+        return subServiceId;
     }
 
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public void setSubServiceId(String subServiceId) {
+        this.subServiceId = subServiceId;
     }
 
     public String getName() {
@@ -54,22 +47,6 @@ public class Facility {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public List<FacilityTypes> getTypes() {
-        return types;
-    }
-
-    public void setTypes(List<FacilityTypes> types) {
-        this.types = types;
     }
 
     public double getPrice() {

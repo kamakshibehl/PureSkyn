@@ -18,6 +18,11 @@ public class Admin {
     private String email;
     private String password;
     private String phone;
+    private Boolean isAdmin;
+
+    public String getName() {
+        return firstName + " " + lastName;
+    }
 
     public String getId() {
         return id;
@@ -65,5 +70,13 @@ public class Admin {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 }

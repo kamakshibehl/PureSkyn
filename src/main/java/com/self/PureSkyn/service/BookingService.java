@@ -30,62 +30,98 @@ public class BookingService {
     private TechnicianService technicianService;
 
     @Autowired
+    private FacilityService facilityService;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Autowired
     private AddressRepo addressRepo;
 
-    public PriceDetailsDTO requestBooking(String serviceId, LocalDate date, LocalTime timeSlot) {
+    @Autowired
+    private FacilityRepo facilityRepo;
+
+
+    public BookingRequestResponseDTO requestBooking(String id, String serviceId, LocalDate date) {
         LocalDate today = LocalDate.now();
-        if (date == null || timeSlot == null) {
-            throw new BadRequestException("Date and timeSlot must be specified");
-        }
+
         if (date.isBefore(today)) {
             throw new BadRequestException("Cannot book a date in the past");
         }
 
-        Facility facility = serviceRepo.findById(serviceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+        Facility facility = facilityRepo.findByServiceId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Service with serviceId: " + id + " not found"));
 
-        boolean technicianAvailable = technicianService.isTechnicianAvailable(serviceId, date, timeSlot);
-        if (!technicianAvailable) {
-            throw new BadRequestException("No technicians are available for the selected time slot");
+        boolean serviceExists = facility.getTypes().stream()
+                .anyMatch(type -> type.getSubServiceId().equals(serviceId));
+
+        if (!serviceExists) {
+            throw new ResourceNotFoundException("Sub Service with id: " + serviceId + " not found in Service with id: " + id);
         }
+
+//        boolean technicianAvailable = technicianService.isTechnicianAvailable(serviceId, date, timeSlot);
+//        if (!technicianAvailable) {
+//            throw new BadRequestException("No technicians are available for the selected time slot");
+//        }
+
+        List<LocalTime> availableTimeSlots = facilityService.getAvailableTimeSlots(serviceId, date);
 
         double halfPrice = facility.getPrice() * 0.5;
         double fullPrice = facility.getPrice();
 
-        return new PriceDetailsDTO(halfPrice, fullPrice);
+        PriceDetailsDTO priceDetails = new PriceDetailsDTO(halfPrice, fullPrice);
+
+        return new BookingRequestResponseDTO(priceDetails, availableTimeSlots);
     }
 
-    public Booking createBooking(Booking booking) {
+    public BookingDTO createBooking(Booking bookingRequest) {
         LocalDate today = LocalDate.now();
-        if (booking.getDate() == null || booking.getTimeSlot() == null) {
+
+        if (bookingRequest.getDate() == null || bookingRequest.getTimeSlot() == null) {
             throw new BadRequestException("Date and timeSlot must be specified");
         }
-        if (booking.getDate().isBefore(today)) {
+        if (bookingRequest.getDate().isBefore(today)) {
             throw new BadRequestException("Cannot book a date in the past");
         }
 
-        Facility facility = serviceRepo.findById(booking.getServiceId())
+        Facility facility = serviceRepo.findByServiceId(bookingRequest.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
+        FacilityTypes subFacility = facility.getTypes().stream()
+                .filter(type -> type.getSubServiceId().equals(bookingRequest.getSubServiceId()))  // Filter by subServiceId
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Sub service not found"));  // Throw exception if not found
+
+
         double requiredPayment = facility.getPrice() * 0.5;
-        Payment paymentDetails = booking.getPayment();
+        Payment paymentDetails = bookingRequest.getPayment();
 
         if (paymentDetails == null || paymentDetails.getAmountPaid() < requiredPayment) {
             throw new BadRequestException("At least 50% payment is required to book the service");
         }
 
-        paymentDetails.setBookingId(booking.getId());
-        paymentDetails.setFullPayment(paymentDetails.getAmountPaid() >= facility.getPrice());
-        paymentDetails.setPaymentDate(LocalDateTime.now());
-
+        Booking booking = new Booking();
+        booking.setUserId(bookingRequest.getUserId());
+        booking.setServiceId(bookingRequest.getServiceId());
+        booking.setSubServiceId(bookingRequest.getSubServiceId());
+        booking.setDate(bookingRequest.getDate());
+        booking.setTimeSlot(bookingRequest.getTimeSlot());
+        booking.setTechnicianId(bookingRequest.getTechnicianId());
+        booking.setAddressId(bookingRequest.getAddressId());
         booking.setStatus(BookingStatus.PENDING);
-        booking.setPayment(paymentDetails);
 
-        return bookingRepo.save(booking);
+        Payment payment = new Payment();
+        payment.setAmountPaid(paymentDetails.getAmountPaid());
+        payment.setFullPayment(paymentDetails.getAmountPaid() >= facility.getPrice());
+        payment.setPaymentDate(LocalDateTime.now());
+
+        booking.setPayment(payment);
+
+        Booking savedBooking = bookingRepo.save(booking);
+
+        return convertToBookingDTO(savedBooking);
     }
+
 
     public BookingDTO assignTechnician(String bookingId, String technicianId) {
 
@@ -143,9 +179,18 @@ public class BookingService {
         dto.setId(booking.getId());
 
         dto.setServiceName(
-                serviceRepo.findById(booking.getServiceId())
+                serviceRepo.findByServiceId(booking.getServiceId())
                         .map(Facility::getName)
                         .orElse("Unknown Service")
+        );
+
+        dto.setSubServiceName(
+                serviceRepo.findByServiceId(booking.getServiceId())
+                        .flatMap(facility -> facility.getTypes().stream()
+                                .filter(type -> type.getSubServiceId().equals(booking.getSubServiceId()))
+                                .findFirst())
+                        .map(FacilityTypes::getName)
+                        .orElse("Unknown SubService")
         );
 
         dto.setUserName(
@@ -163,17 +208,23 @@ public class BookingService {
         );
 
         dto.setAddress(
-                addressRepo.findById(String.valueOf(booking.getAddressId()))
+                addressRepo.findById(booking.getAddressId())
                         .map(this::formatAddress)
                         .orElse("Unknown Address")
         );
 
+        dto.setPinCode(booking.getPinCode());
+
+        dto.setPayment(booking.getPayment());
+
         dto.setDate(booking.getDate());
         dto.setTimeSlot(booking.getTimeSlot());
-        dto.setStatus(BookingStatus.valueOf(booking.getStatus().name())); // Assuming `getStatus()` is an enum
+
+        dto.setStatus(booking.getStatus());
 
         return dto;
     }
+
 
     private String formatAddress(Address address) {
         return String.format("%s, %s, %s, %s, %s, %s",

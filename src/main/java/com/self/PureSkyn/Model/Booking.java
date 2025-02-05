@@ -1,5 +1,6 @@
 package com.self.PureSkyn.Model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +20,17 @@ public class Booking {
     private String userId;
     private String technicianId;
     private String serviceId;
+    private String subServiceId;
 
     private String addressId;
     private String pinCode;
     private Payment payment;
 
     private LocalDate date;
+
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime timeSlot;
+
     private BookingStatus status;
 
     public String getId() {
@@ -34,6 +39,14 @@ public class Booking {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getSubServiceId() {
+        return subServiceId;
+    }
+
+    public void setSubServiceId(String subServiceId) {
+        this.subServiceId = subServiceId;
     }
 
     public String getUserId() {

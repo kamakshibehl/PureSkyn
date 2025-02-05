@@ -1,6 +1,8 @@
 package com.self.PureSkyn.controller;
 
+import com.self.PureSkyn.Model.ApiResponse;
 import com.self.PureSkyn.Model.Facility;
+import com.self.PureSkyn.Model.FacilityTypes;
 import com.self.PureSkyn.repository.FacilityRepo;
 import com.self.PureSkyn.service.FacilityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,8 +25,8 @@ public class FacilityController {
     FacilityService facilityService;
 
     @GetMapping("/all")
-    public List<Facility> getAllServices() {
-        return serviceRepo.findAll();
+    public ResponseEntity<ApiResponse> getAllFacilities() {
+        return facilityService.getAllFacilities();
     }
 
     @PostMapping("/create")
