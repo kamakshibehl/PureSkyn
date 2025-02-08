@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookingService {
@@ -52,22 +53,22 @@ public class BookingService {
         Facility facility = facilityRepo.findByServiceId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service with serviceId: " + id + " not found"));
 
-        boolean serviceExists = facility.getTypes().stream()
-                .anyMatch(type -> type.getSubServiceId().equals(serviceId));
+//        boolean serviceExists = facility.getTypes().stream()
+//                .anyMatch(type -> type.getSubServiceId().equals(serviceId));
 
-        if (!serviceExists) {
+        Optional<FacilityTypes> subService = facility.getTypes().stream()
+                .filter(type -> type.getSubServiceId().equals(serviceId))
+                .findFirst();
+
+
+        if (subService.isEmpty()) {
             throw new ResourceNotFoundException("Sub Service with id: " + serviceId + " not found in Service with id: " + id);
         }
 
-//        boolean technicianAvailable = technicianService.isTechnicianAvailable(serviceId, date, timeSlot);
-//        if (!technicianAvailable) {
-//            throw new BadRequestException("No technicians are available for the selected time slot");
-//        }
-
         List<LocalTime> availableTimeSlots = facilityService.getAvailableTimeSlots(serviceId, date);
 
-        double halfPrice = facility.getPrice() * 0.5;
-        double fullPrice = facility.getPrice();
+        double halfPrice = subService.get().getPrice() * 0.5;
+        double fullPrice = subService.get().getPrice();
 
         PriceDetailsDTO priceDetails = new PriceDetailsDTO(halfPrice, fullPrice);
 

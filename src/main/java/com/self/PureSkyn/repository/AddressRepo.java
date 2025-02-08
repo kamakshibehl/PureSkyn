@@ -14,5 +14,5 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface AddressRepo extends MongoRepository<Address, String> {
-    List<Address> findByUserId(String userId);
+
 }

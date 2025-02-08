@@ -24,9 +24,6 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-//    @Autowired
-//    private UserService userService;
-
     @Autowired
     private UserRepo userRepo;
 
@@ -108,8 +105,6 @@ public class AuthController {
     }
 
 
-
-
     @PostMapping("/request-password-change")
     public ResponseEntity<ApiResponse<?>> requestPasswordChange(@RequestParam String email) {
         try {
@@ -162,9 +157,9 @@ public class AuthController {
     }
 
     @PutMapping("/user/add-address")
-    public ResponseEntity<ApiResponse<User>> addAddress(@RequestBody AddAddressRequestDTO request) {
+    public ResponseEntity<ApiResponse<UserDetailsDTO>> addAddress(@RequestBody AddAddressRequestDTO request) {
         try {
-            User updatedUser = addressService.addAddressToUser(request.getUserId(), request.getAddress());
+            UserDetailsDTO updatedUser = addressService.addAddressToUser(request.getUserId(), request.getAddress());
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Address added successfully", updatedUser));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

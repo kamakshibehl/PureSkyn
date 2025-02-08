@@ -9,13 +9,20 @@ import java.util.List;
 @Getter
 public class UserDetailsDTO {
     private String id;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
     private String phone;
     private String gender;
     List<Address> addresses;
     List<BookingDTO> bookings;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getId() {
         return id;
@@ -25,21 +32,6 @@ public class UserDetailsDTO {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
     public String getEmail() {
         return email;

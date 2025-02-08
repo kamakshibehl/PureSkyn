@@ -9,26 +9,26 @@ import org.springframework.data.annotation.Id;
 @Getter
 @Setter
 public class UserSignUpDTO {
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
     private String password;
     private String phone;
+    private String gender;
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getGender() {
+        return gender;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getEmail() {

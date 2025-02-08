@@ -48,26 +48,11 @@ public class UserService {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-//        if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {
-//            if (userRepo.existsByEmail(updateRequest.getEmail())) {
-//                throw new IllegalArgumentException("Email already exists");
-//            }
-//            user.setEmail(updateRequest.getEmail());
-//        }
-//
-//        if (updateRequest.getPhone() != null && !updateRequest.getPhone().equals(user.getPhone())) {
-//            if (userRepo.existsByPhone(updateRequest.getPhone())) {
-//                throw new IllegalArgumentException("Phone number already exists");
-//            }
-//            user.setPhone(updateRequest.getPhone());
-//        }
 
-        if (StringUtils.hasText(updateRequest.getFirstName())) {
-            user.setFirstName(updateRequest.getFirstName());
+        if (StringUtils.hasText(updateRequest.getName())) {
+            user.setName(updateRequest.getName());
         }
-        if (StringUtils.hasText(updateRequest.getLastName())) {
-            user.setLastName(updateRequest.getLastName());
-        }
+
         if (StringUtils.hasText(updateRequest.getGender())) {
             user.setGender(updateRequest.getGender());
         }
@@ -89,8 +74,7 @@ public class UserService {
     private UserUpdateDTO convertToUserUpdateDTO(User user) {
         UserUpdateDTO dto = new UserUpdateDTO();
         dto.setId(user.getId());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
+        dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setGender(user.getGender());
@@ -104,8 +88,7 @@ public class UserService {
 
         UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
         userDetailsDTO.setId(user.getId());
-        userDetailsDTO.setFirstName(user.getFirstName());
-        userDetailsDTO.setLastName(user.getLastName());
+        userDetailsDTO.setName(user.getName());
         userDetailsDTO.setEmail(user.getEmail());
         userDetailsDTO.setPhone(user.getPhone());
         userDetailsDTO.setGender(user.getGender());

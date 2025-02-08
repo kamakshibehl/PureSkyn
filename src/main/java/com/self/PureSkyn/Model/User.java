@@ -19,8 +19,7 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     private String id;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
     private String password;
     private String phone;
@@ -62,10 +61,6 @@ public class User implements UserDetails {
         return true;
     }
 
-    public String getName() {
-        return firstName + " " + lastName;
-    }
-
 
     public String getId() {
         return id;
@@ -75,20 +70,12 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {

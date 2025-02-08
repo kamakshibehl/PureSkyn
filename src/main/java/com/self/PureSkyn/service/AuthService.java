@@ -51,9 +51,9 @@ public class AuthService {
         User user = new User();
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
-        user.setFirstName(userSignUpDTO.getFirstName());
-        user.setLastName(userSignUpDTO.getLastName());
+        user.setName(userSignUpDTO.getName());
         user.setPhone(userSignUpDTO.getPhone());
+        user.setGender(userSignUpDTO.getGender());
 
         userRepo.save(user);
 
@@ -65,6 +65,7 @@ public class AuthService {
                 user.getEmail(),
                 user.getName(),
                 user.getPhone(),
+                user.getGender(),
                 jwt
         );
     }
@@ -83,8 +84,9 @@ public class AuthService {
         return new UserLoginDTO(
                 user.getId(),
                 user.getEmail(),
-                user.getFirstName() + " " + user.getLastName(),
+                user.getName(),
                 user.getPhone(),
+                user.getGender(),
                 jwt
         );
     }

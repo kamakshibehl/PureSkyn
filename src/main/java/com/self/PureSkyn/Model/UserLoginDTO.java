@@ -10,26 +10,36 @@ import org.springframework.data.annotation.Id;
 @Setter
 public class UserLoginDTO {
     @Id
-    private String Id;
+    private String id;
     private String email;
     private String name;
     private String phone;
+    private String gender;
     private String token;
 
-    public UserLoginDTO(String id, String email, String name, String phone, String token) {
-        this.Id = id;
+    public UserLoginDTO(String id, String email, String name, String phone, String gender, String token) {
+        this.id = id;
         this.email = email;
         this.name = name;
         this.phone = phone;
+        this.gender = gender;
         this.token = token;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getEmail() {
