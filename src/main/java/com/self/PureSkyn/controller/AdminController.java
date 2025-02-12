@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+@CrossOrigin(origins = "https://milanmishra1206.github.io/")
 @RestController
 @RequestMapping("/api/v1/admin")
 public class AdminController {
