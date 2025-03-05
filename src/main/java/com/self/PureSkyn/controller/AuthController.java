@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "https://milanmishra1206.github.io")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -64,13 +63,11 @@ public class AuthController {
         String normalizedEmail = userDTO.getEmail().toLowerCase();
 
         if (userRepo.existsByEmail(normalizedEmail)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "Email already exists"));
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "Email already exists", null));
         }
 
         if (userRepo.existsByPhone(userDTO.getPhone())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "Contact number already exists"));
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "Contact Number already exists", null));
         }
 
         try {
@@ -94,11 +91,17 @@ public class AuthController {
                     userLoginDTO
             ));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, "Invalid credentials"));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    "Invalid credentials",
+                    null
+            ));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
@@ -112,8 +115,7 @@ public class AuthController {
             String responseMessage = authService.requestPasswordChange(email);
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, responseMessage));
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "User not found"));
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "User Not Found", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred while processing the request"));
@@ -132,8 +134,11 @@ public class AuthController {
 
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, responseMessage));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
@@ -149,11 +154,33 @@ public class AuthController {
             UserUpdateDTO updatedUser = userService.updateUserProfile(request.getId(), request);
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "User updated successfully", updatedUser));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "User Not Found", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
+        }
+    }
+
+    @PatchMapping("/update-address")
+    public ResponseEntity<ApiResponse<UserUpdateDTO>> updateAddress(@RequestBody AddressUpdateRequestDTO request) {
+        try {
+            UserUpdateDTO updatedUser = userService.updateAddress(request);
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Address updated successfully", updatedUser));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "User Not Found", null));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred while updating address"));
         }
     }
 
@@ -163,8 +190,11 @@ public class AuthController {
             UserDetailsDTO updatedUser = addressService.addAddressToUser(request.getUserId(), request.getAddress());
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Address added successfully", updatedUser));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));

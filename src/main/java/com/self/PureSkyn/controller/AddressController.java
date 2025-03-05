@@ -24,8 +24,7 @@ public class AddressController {
             List<Address> addresses = addressService.getAddressesByUserId(userId);
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Addresses retrieved successfully", addresses));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.FAIL, "No addresses found for user with ID: " + userId, null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
