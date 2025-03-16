@@ -63,6 +63,29 @@ public class AddressService {
         return convertToUserDetailsDTO(userRepo.save(user));
     }
 
+    public UserDetailsDTO deleteAddressFromUser(String userId, String addressId) {
+        Optional<User> optionalUser = userRepo.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
+        }
+
+        User user = optionalUser.get();
+
+        if (user.getAddresses() == null || user.getAddresses().isEmpty()) {
+            throw new ResourceNotFoundException("No addresses found for user ID: " + userId);
+        }
+
+        boolean removed = user.getAddresses().removeIf(address -> address.getId().equals(addressId));
+
+        if (!removed) {
+            throw new ResourceNotFoundException("Address not found with ID: " + addressId);
+        }
+
+        return convertToUserDetailsDTO(userRepo.save(user));
+    }
+
+
     private UserDetailsDTO convertToUserDetailsDTO(User user) {
 
         List<BookingDTO> bookings = bookingService.getBookingsByUserId(user.getId());

@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface BookingRepo extends MongoRepository<Booking, String> {
 
-    List<Booking> findByDate(LocalDate date);
+    List<Booking> findByUserInfo_TreatmentDate(LocalDate date);
 
     List<Booking> findByStatus(BookingStatus status);
 
-    List<Booking> findAllByOrderByDateDesc();
+    List<Booking> findAllByOrderByUserInfo_TreatmentDateDesc();
 
     List<Booking> findByUserId(String userId);
 

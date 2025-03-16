@@ -151,6 +151,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/**").permitAll()
+                        //.requestMatchers("/api/v1/auth/register").permitAll()
+                        //.requestMatchers("/api/v1/auth/login").permitAll()
+                        //.requestMatchers("/api/v1/auth/query/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated())
@@ -172,10 +175,11 @@ public class SecurityConfig {
                 "https://milanmishra1206.github.io",
                 "http://localhost:3000",
                 "http://localhost:5000",
+                "https://localhost:5000",
                 "http://localhost:5173",
                 "http://127.0.0.1:3000"
         ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST","PATCH", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
 
         config.setExposedHeaders(List.of("Authorization"));

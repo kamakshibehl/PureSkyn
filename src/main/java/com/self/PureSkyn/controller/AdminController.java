@@ -36,19 +36,19 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    @PutMapping("/{bookingId}/assignTechnician")
-    @PreAuthorize("@adminService.isCurrentUserAdmin()")
-    public ResponseEntity<?> assignTechnician(@PathVariable String bookingId,
-                                              @RequestParam String technicianId) {
-        try {
-            BookingDTO updatedBooking = bookingService.assignTechnician(bookingId, technicianId);
-            return ResponseEntity.ok(updatedBooking);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
+//    @PutMapping("/{bookingId}/assignTechnician")
+//    @PreAuthorize("@adminService.isCurrentUserAdmin()")
+//    public ResponseEntity<?> assignTechnician(@PathVariable String bookingId,
+//                                              @RequestParam String technicianId) {
+//        try {
+//            BookingDTO updatedBooking = bookingService.assignTechnician(bookingId, technicianId);
+//            return ResponseEntity.ok(updatedBooking);
+//        } catch (ResourceNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//        } catch (BadRequestException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+//        }
+//    }
 
     @GetMapping("/available-technicians")
     @PreAuthorize("@adminService.isCurrentUserAdmin()")
