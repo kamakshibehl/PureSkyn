@@ -3,36 +3,25 @@ package com.self.PureSkyn.Model;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 @Data
 @Getter
 @Setter
-public class UserLoginDTO {
+public class AdminLoginDTO {
     private String id;
     private String email;
     private String name;
     private String phone;
-    private String gender;
     private String role;
     private String token;
 
-    public UserLoginDTO(String id, String email, String name, String phone, String gender, String role, String token) {
+    public AdminLoginDTO(String id, String email, String name, String phone, String role, String token) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.phone = phone;
-        this.gender = gender;
         this.role = role;
         this.token = token;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
     }
 
     public String getId() {

@@ -24,11 +24,12 @@ public class User implements UserDetails {
     private String password;
     private String phone;
     private String gender;
+    private String role = "ROLE_USER";
     List<Address> addresses;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override
@@ -112,5 +113,13 @@ public class User implements UserDetails {
 
     public void setAddresses(List<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

@@ -36,6 +36,55 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AdminLoginDTO>> registerUser(@RequestBody AdminSignUpDTO admin) {
+        String normalizedEmail = admin.getEmail().toLowerCase();
+
+        if (adminRepo.existsByEmail(normalizedEmail)) {
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "Email already exists", null));
+        }
+
+        if (adminRepo.existsByPhone(admin.getPhone())) {
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.ERROR, "Contact Number already exists", null));
+        }
+
+        try {
+            AdminLoginDTO adminLoginDTO = adminService.registerAdmin(admin);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Admin registered successfully", adminLoginDTO));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AdminLoginDTO>> authenticateAdmin(@RequestBody LoginRequestDTO loginRequest) {
+        try {
+            AdminLoginDTO userLoginDTO = adminService.authenticateUser(loginRequest);
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.SUCCESS,
+                    "Login successful",
+                    userLoginDTO
+            ));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    "Invalid credentials",
+                    null
+            ));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
+        }
+    }
+
 //    @PutMapping("/{bookingId}/assignTechnician")
 //    @PreAuthorize("@adminService.isCurrentUserAdmin()")
 //    public ResponseEntity<?> assignTechnician(@PathVariable String bookingId,
@@ -65,54 +114,6 @@ public class AdminController {
         return ResponseEntity.ok(availableTechnicians);
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<ApiResponse<UserLoginDTO>> registerUser(@RequestBody UserSignUpDTO userDTO) {
-//        String normalizedEmail = userDTO.getEmail().toLowerCase();
-//
-//        if (adminRepo.existsByEmail(normalizedEmail)) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT)
-//                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "Email already exists"));
-//        }
-//
-//        if (adminRepo.existsByPhone(userDTO.getPhone())) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT)
-//                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "Contact number already exists"));
-//        }
-//
-//        try {
-//            UserLoginDTO userLoginDTO = adminService.registerUser(userDTO);
-//            return ResponseEntity.status(HttpStatus.CREATED)
-//                    .body(new ApiResponse<>(ApiResponseStatus.SUCCESS, "User registered successfully", userLoginDTO));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
-//        }
-//    }
-
-
-
-//    @PostMapping("/login")
-//    public ResponseEntity<ApiResponse<UserLoginDTO>> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
-//        try {
-//            UserLoginDTO userLoginDTO = adminService.authenticateUser(loginRequest);
-//            return ResponseEntity.ok(new ApiResponse<>(
-//                    ApiResponseStatus.SUCCESS,
-//                    "Login successful",
-//                    userLoginDTO
-//            ));
-//        } catch (BadCredentialsException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-//                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, "Invalid credentials"));
-//        } catch (ResourceNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, e.getMessage()));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
-//        }
-//    }
-//
-//
 //    @PostMapping("/request-password-change")
 //    public ResponseEntity<ApiResponse<?>> requestPasswordChange(@RequestParam String email) {
 //        try {

@@ -12,4 +12,20 @@ import java.util.List;
 public class CartRequestDTO {
     private String userId;
     private List<CartPackageDetailsDTO> packageDetails;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public List<CartPackageDetailsDTO> getPackageDetails() {
+        return packageDetails;
+    }
+
+    public void setPackageDetails(List<CartPackageDetailsDTO> packageDetails) {
+        this.packageDetails = packageDetails;
+    }
 }
