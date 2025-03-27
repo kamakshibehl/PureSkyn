@@ -176,7 +176,7 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://127.0.0.1:3000"
         ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
 //        config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
 //
 //        config.setExposedHeaders(List.of("Authorization"));

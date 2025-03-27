@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,19 +22,15 @@ public class Booking {
     private String id;
     private String userId;
     private String technicianId;
-    private String serviceId;
-    private String subServiceId;
 
-    private String addressId;
-    private String pinCode;
+    private BookingUserInfoDTO userInfo;
+    private List<BookingServiceInfoDTO> servicesBooked;
+
     private Payment payment;
-
-    private LocalDate date;
-
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime timeSlot;
-
     private BookingStatus status;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     public String getId() {
         return id;
@@ -39,14 +38,6 @@ public class Booking {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getSubServiceId() {
-        return subServiceId;
-    }
-
-    public void setSubServiceId(String subServiceId) {
-        this.subServiceId = subServiceId;
     }
 
     public String getUserId() {
@@ -65,28 +56,20 @@ public class Booking {
         this.technicianId = technicianId;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public BookingUserInfoDTO getUserInfo() {
+        return userInfo;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public void setUserInfo(BookingUserInfoDTO userInfo) {
+        this.userInfo = userInfo;
     }
 
-    public String getAddressId() {
-        return addressId;
+    public List<BookingServiceInfoDTO> getServicesBooked() {
+        return servicesBooked;
     }
 
-    public void setAddressId(String addressId) {
-        this.addressId = addressId;
-    }
-
-    public String getPinCode() {
-        return pinCode;
-    }
-
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
+    public void setServicesBooked(List<BookingServiceInfoDTO> servicesBooked) {
+        this.servicesBooked = servicesBooked;
     }
 
     public Payment getPayment() {
@@ -97,27 +80,19 @@ public class Booking {
         this.payment = payment;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getTimeSlot() {
-        return timeSlot;
-    }
-
-    public void setTimeSlot(LocalTime timeSlot) {
-        this.timeSlot = timeSlot;
-    }
-
     public BookingStatus getStatus() {
         return status;
     }
 
     public void setStatus(BookingStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

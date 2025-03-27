@@ -27,15 +27,14 @@ public class BookingController {
     public ResponseEntity<ApiResponse<List<BookingDTO>>> getAllBookingsInDescOrder() {
         try {
             List<BookingDTO> bookings = bookingService.getAllBookingsInDescOrder();
-
             if (bookings.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                        new ApiResponse<>(ApiResponseStatus.SUCCESS, "No bookings found", bookings)
-                );
+                return ResponseEntity.ok(new ApiResponse<>(
+                        ApiResponseStatus.FAIL,
+                        "No bookings found.",
+                        null
+                ));
             }
-
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Bookings retrieved successfully", bookings));
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred")
@@ -47,19 +46,21 @@ public class BookingController {
     public ResponseEntity<ApiResponse<List<BookingDTO>>> getBookingsByUserId(@PathVariable String userId) {
         try {
             List<BookingDTO> userBookings = bookingService.getBookingsByUserId(userId);
-
             if (userBookings.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                        new ApiResponse<>(ApiResponseStatus.SUCCESS, "No bookings found for the user", userBookings)
-                );
+                return ResponseEntity.ok(new ApiResponse<>(
+                        ApiResponseStatus.FAIL,
+                        "No bookings found for the user.",
+                        null
+                ));
             }
-
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "User bookings retrieved successfully", userBookings));
 
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ApiResponse<>(ApiResponseStatus.FAIL, "User not found")
-            );
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    "User not found.",
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred")
@@ -67,42 +68,40 @@ public class BookingController {
         }
     }
 
-
-    @PostMapping("/request")
-    public ResponseEntity<ApiResponse<BookingRequestResponseDTO>> requestBooking(@RequestBody BookingRequestDTO bookingRequest) {
-        try {
-            BookingRequestResponseDTO bookingDetails = bookingService.requestBooking(
-                    bookingRequest.getServiceId(),
-                    bookingRequest.getSubServiceId(),
-                    bookingRequest.getDate()
-            );
-
-            return ResponseEntity.ok(new ApiResponse<>(
-                    ApiResponseStatus.SUCCESS,
-                    "Booking request processed successfully",
-                    bookingDetails
-            ));
-
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
-                    ApiResponseStatus.FAIL,
-                    e.getMessage()
-            ));
-
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(
-                    ApiResponseStatus.FAIL,
-                    e.getMessage()
-            ));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(
-                    ApiResponseStatus.ERROR,
-                    "An unexpected error occurred"
-            ));
-        }
-    }
-
+//    @PostMapping("/request")
+//    public ResponseEntity<ApiResponse<BookingRequestResponseDTO>> requestBooking(@RequestBody BookingRequestDTO bookingRequest) {
+//        try {
+//            BookingRequestResponseDTO bookingDetails = bookingService.requestBooking(
+//                    bookingRequest.getServiceId(),
+//                    bookingRequest.getSubServiceId(),
+//                    bookingRequest.getDate()
+//            );
+//
+//            return ResponseEntity.ok(new ApiResponse<>(
+//                    ApiResponseStatus.SUCCESS,
+//                    "Booking request processed successfully",
+//                    bookingDetails
+//            ));
+//
+//        } catch (BadRequestException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
+//                    ApiResponseStatus.FAIL,
+//                    e.getMessage()
+//            ));
+//
+//        } catch (ResourceNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(
+//                    ApiResponseStatus.FAIL,
+//                    e.getMessage()
+//            ));
+//
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(
+//                    ApiResponseStatus.ERROR,
+//                    "An unexpected error occurred"
+//            ));
+//        }
+//    }
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<BookingDTO>> createBooking(@RequestBody Booking bookingRequest) {
@@ -111,8 +110,11 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Booking created successfully", createdBooking));
         } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
@@ -120,23 +122,24 @@ public class BookingController {
     }
 
 
-    @GetMapping("/pending")
+    @GetMapping("/all/{status}")
     @PreAuthorize("@adminService.isCurrentUserAdmin()")
-    public ResponseEntity<ApiResponse<List<BookingDTO>>> getAllPendingBookings() {
+    public ResponseEntity<ApiResponse<List<BookingDTO>>> getAllBookingsByStatus(@PathVariable BookingStatus status) {
         try {
-            List<BookingDTO> pendingBookingDTOs = bookingService.getAllPendingBookings();
+            List<BookingDTO> bookings = bookingService.getBookingsByStatus(status);
 
-            if (pendingBookingDTOs.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                        .body(new ApiResponse<>(ApiResponseStatus.SUCCESS, "No pending bookings found", pendingBookingDTOs));
-            }
-            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Pending bookings retrieved successfully", pendingBookingDTOs));
+            if (bookings.isEmpty()) {
+                return ResponseEntity.ok(new ApiResponse<>(
+                        ApiResponseStatus.FAIL,
+                        "No bookings found for status: " + status,
+                        null
+                ));  }
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Bookings retrieved successfully", bookings));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
         }
     }
-
 
     @GetMapping("/by-date")
     @PreAuthorize("@adminService.isCurrentUserAdmin()")
@@ -146,10 +149,12 @@ public class BookingController {
             List<BookingDTO> bookingDTOs = bookingService.getBookingsByDate(date);
 
             if (bookingDTOs.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                        .body(new ApiResponse<>(ApiResponseStatus.SUCCESS, "No bookings found for the specified date", bookingDTOs));
+                return ResponseEntity.ok(new ApiResponse<>(
+                        ApiResponseStatus.FAIL,
+                        "No bookings found for the specified date.",
+                        null
+                ));
             }
-
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Bookings retrieved successfully", bookingDTOs));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -157,49 +162,22 @@ public class BookingController {
         }
     }
 
-
-    @PatchMapping("/{bookingId}/complete")
-    public ResponseEntity<ApiResponse<String>> markBookingAsCompleted(@PathVariable String bookingId) {
+    @PatchMapping("/{bookingId}/status")
+    public ResponseEntity<ApiResponse<String>> changeBookingStatus(@PathVariable String bookingId, @RequestParam BookingStatus newStatus ) {
         try {
-            Booking updatedBooking = bookingService.markBookingAsCompleted(bookingId);
+            Booking updatedBooking = bookingService.updateBookingStatus(bookingId, newStatus);
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Booking status updated successfully"));
 
-            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Booking marked as completed successfully"));
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
-
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
-
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred"));
         }
     }
-
-
-    @PatchMapping("/{bookingId}/cancel")
-    public ResponseEntity<ApiResponse<String>> markBookingAsCanceled(@PathVariable String bookingId) {
-        try {
-            Booking updatedBooking = bookingService.markBookingAsCancelled(bookingId);
-
-            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Booking marked as cancelled successfully"));
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
-
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, e.getMessage()));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred"));
-        }
-    }
-
 }
 

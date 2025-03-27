@@ -7,8 +7,7 @@ import com.self.PureSkyn.repository.AdminRepo;
 import com.self.PureSkyn.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,56 +29,55 @@ public class AdminService {
         this.adminRepo = adminRepo;
     }
 
-    public boolean isCurrentUserAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = ((User) authentication.getPrincipal()).getEmail();
-        return adminRepo.existsByEmail(currentUserEmail);
+    public AdminLoginDTO registerAdmin(AdminSignUpDTO admin) {
+        String normalizedEmail = admin.getEmail().toLowerCase();
+
+        Admin newAdmin = new Admin();
+        newAdmin.setEmail(normalizedEmail);
+        newAdmin.setPassword(passwordEncoder.encode(admin.getPassword()));
+        newAdmin.setName(admin.getName());
+        newAdmin.setPhone(admin.getPhone());
+        newAdmin.setRole("ROLE_ADMIN");
+
+        newAdmin = adminRepo.save(newAdmin);
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(admin.getEmail());
+        String jwt = jwtUtils.generateToken(userDetails);
+
+        return new AdminLoginDTO(
+                newAdmin.getId(),
+                newAdmin.getEmail(),
+                newAdmin.getName(),
+                newAdmin.getPhone(),
+                newAdmin.getRole(),
+                jwt
+        );
     }
 
+    public AdminLoginDTO authenticateUser(LoginRequestDTO loginRequest) {
+        Admin user = adminRepo.findByEmail(loginRequest.getEmail().toLowerCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
 
-//    public UserLoginDTO registerUser(UserSignUpDTO userSignUpDTO) {
-//
-//        String normalizedEmail = userSignUpDTO.getEmail().toLowerCase();
-//
-//        Admin user = new Admin();
-//        user.setEmail(normalizedEmail);
-//        user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
-//        user.setFirstName(userSignUpDTO.getFirstName());
-//        user.setLastName(userSignUpDTO.getLastName());
-//        user.setPhone(userSignUpDTO.getPhone());
-//        user.setAdmin(true);
-//
-//        adminRepo.save(user);
-//
-//        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
-//        String jwt = jwtUtils.generateToken(userDetails);
-//
-//        return new UserLoginDTO(
-//                user.getId(),
-//                user.getEmail(),
-//                user.getName(),
-//                user.getPhone(),
-//                jwt
-//        );
-//    }
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
 
-//    public UserLoginDTO authenticateUser(LoginRequestDTO loginRequest) {
-//        User user = adminRepo.findByEmail(loginRequest.getEmail())
-//                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-//
-//        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-//            throw new BadCredentialsException("Invalid credentials");
-//        }
-//
-//        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
-//        String jwt = jwtUtils.generateToken(userDetails);
-//
-//        return new UserLoginDTO(
-//                user.getId(),
-//                user.getEmail(),
-//                user.getFirstName() + " " + user.getLastName(),
-//                user.getPhone(),
-//                jwt
-//        );
-//    }
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
+        String jwt = jwtUtils.generateToken(userDetails);
+
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_USER");
+
+        return new AdminLoginDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getPhone(),
+                role,
+                jwt
+        );
+    }
+
 }

@@ -17,74 +17,18 @@ public class Facility {
     @Id
     private String id;
     private String serviceId;
-    private String name;
-    private String description;
-    private String category;
-    private List<FacilityTypes> types;
-    private double price;
+    private String treatmentName;
+    private String packageName;
+
+    private String packagePrice;
+    private String strikeOutPrice;
+
+    private String featureName;
+    private String selectedPackageImg;
     private String duration;
 
-    public String getId() {
-        return id;
-    }
+    private String category;
+    private String packageType;
+    private List<FacilityTypes> types;
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public List<FacilityTypes> getTypes() {
-        return types;
-    }
-
-    public void setTypes(List<FacilityTypes> types) {
-        this.types = types;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
 }

@@ -24,40 +24,15 @@ public class FacilityService {
     FacilityRepo facilityRepo;
 
 
-    public Facility createFacility(Facility facility) {
-        if (facilityRepo.existsByName(facility.getName())) {
-            throw new IllegalArgumentException("Service with the same name already exists.");
-        }
-        return facilityRepo.save(facility);
-    }
+//    public Facility createFacility(Facility facility) {
+//        if (facilityRepo.existsByName(facility.getName())) {
+//            throw new IllegalArgumentException("Service with the same name already exists.");
+//        }
+//        return facilityRepo.save(facility);
+//    }
 
-    public ResponseEntity<ApiResponse> getAllFacilities() {
-        List<Facility> facilities = facilityRepo.findAll();
-
-        if (facilities.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse(ApiResponseStatus.FAIL, "No facilities found", null));
-
-        }
-
-        for (Facility facility : facilities) {
-            if (facility.getTypes() != null) {
-                List<FacilityTypes> mappedTypes = new ArrayList<>();
-                for (FacilityTypes type : facility.getTypes()) {
-                    mappedTypes.add(new FacilityTypes(
-                            type.getSubServiceId() != null ? type.getSubServiceId() : generateUniqueId(),
-                            type.getName(),
-                            type.getDescription(),
-                            type.getPrice(),
-                            type.getDuration()
-                    ));
-                }
-                facility.setTypes(mappedTypes);
-            }
-        }
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponse(ApiResponseStatus.SUCCESS, "Facilities fetched successfully", facilities));
+    public List<Facility> getAllFacilities() {
+        return facilityRepo.findAll();
     }
 
     public List<LocalTime> getAvailableTimeSlots(String serviceId, LocalDate date) {

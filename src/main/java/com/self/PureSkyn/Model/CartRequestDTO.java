@@ -4,14 +4,14 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
 public class CartRequestDTO {
     private String userId;
-    private String serviceId;
-    private String subServiceId;
-    private int quantity;
+    private List<CartPackageDetailsDTO> packageDetails;
 
     public String getUserId() {
         return userId;
@@ -21,27 +21,11 @@ public class CartRequestDTO {
         this.userId = userId;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public List<CartPackageDetailsDTO> getPackageDetails() {
+        return packageDetails;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public String getSubServiceId() {
-        return subServiceId;
-    }
-
-    public void setSubServiceId(String subServiceId) {
-        this.subServiceId = subServiceId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setPackageDetails(List<CartPackageDetailsDTO> packageDetails) {
+        this.packageDetails = packageDetails;
     }
 }

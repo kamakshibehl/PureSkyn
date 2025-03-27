@@ -6,60 +6,39 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Getter
 @Setter
 public class BookingDTO {
-    @Id
-    private String id;
+    private String bookingId;
     private String userId;
-    private String userName;
     private String technicianId;
     private String technicianName;
-    private String serviceId;
-    private String serviceName;
-    private String subServiceId;
-    private String subServiceName;
-    private String address;
-    private String pinCode;
+    private BookingUserInfoDTO userInfo;
+    private List<BookingServiceInfoDTO> servicesBooked;
+
     private Payment payment;
-
-    private LocalDate date;
-    private LocalTime timeSlot;
     private BookingStatus status;
+    private LocalDateTime createdAt;
 
-    public String getSubServiceId() {
-        return subServiceId;
+    public String getBookingId() {
+        return bookingId;
     }
 
-    public void setSubServiceId(String subServiceId) {
-        this.subServiceId = subServiceId;
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
     }
 
-    public String getSubServiceName() {
-        return subServiceName;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setSubServiceName(String subServiceName) {
-        this.subServiceName = subServiceName;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getTechnicianId() {
@@ -78,20 +57,20 @@ public class BookingDTO {
         this.technicianName = technicianName;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public BookingUserInfoDTO getUserInfo() {
+        return userInfo;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setUserInfo(BookingUserInfoDTO userInfo) {
+        this.userInfo = userInfo;
     }
 
-    public String getAddress() {
-        return address;
+    public List<BookingServiceInfoDTO> getServicesBooked() {
+        return servicesBooked;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setServicesBooked(List<BookingServiceInfoDTO> servicesBooked) {
+        this.servicesBooked = servicesBooked;
     }
 
     public Payment getPayment() {
@@ -102,14 +81,6 @@ public class BookingDTO {
         this.payment = payment;
     }
 
-    public LocalTime getTimeSlot() {
-        return timeSlot;
-    }
-
-    public void setTimeSlot(LocalTime timeSlot) {
-        this.timeSlot = timeSlot;
-    }
-
     public BookingStatus getStatus() {
         return status;
     }
@@ -118,35 +89,11 @@ public class BookingDTO {
         this.status = status;
     }
 
-    public String getPinCode() {
-        return pinCode;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
@@ -14,16 +16,7 @@ public class Cart {
     @Id
     private String id;
     private String userId;
-    private String serviceId;
-    private String subServiceId;
-    private int quantity;
-
-    public Cart(String userId, String serviceId, String subServiceId, int quantity) {
-        this.userId = userId;
-        this.serviceId = serviceId;
-        this.subServiceId = subServiceId;
-        this.quantity = quantity;
-    }
+    private List<CartPackageDetailsDTO> packageDetails;
 
     public String getId() {
         return id;
@@ -41,27 +34,11 @@ public class Cart {
         this.userId = userId;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public List<CartPackageDetailsDTO> getPackageDetails() {
+        return packageDetails;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public String getSubServiceId() {
-        return subServiceId;
-    }
-
-    public void setSubServiceId(String subServiceId) {
-        this.subServiceId = subServiceId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setPackageDetails(List<CartPackageDetailsDTO> packageDetails) {
+        this.packageDetails = packageDetails;
     }
 }

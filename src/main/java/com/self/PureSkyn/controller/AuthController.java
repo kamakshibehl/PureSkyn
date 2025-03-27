@@ -57,7 +57,6 @@ public class AuthController {
         this.addressService = addressService;
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserLoginDTO>> registerUser(@RequestBody UserSignUpDTO userDTO) {
         String normalizedEmail = userDTO.getEmail().toLowerCase();
@@ -79,7 +78,6 @@ public class AuthController {
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
         }
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<UserLoginDTO>> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
@@ -148,7 +146,7 @@ public class AuthController {
         }
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update-user")
     public ResponseEntity<ApiResponse<UserUpdateDTO>> updateUser(@RequestBody UserUpdateDTO request) {
         try {
             UserUpdateDTO updatedUser = userService.updateUserProfile(request.getId(), request);
@@ -167,7 +165,7 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("/update-address")
+    @PutMapping("/update-address")
     public ResponseEntity<ApiResponse<UserUpdateDTO>> updateAddress(@RequestBody AddressUpdateRequestDTO request) {
         try {
             UserUpdateDTO updatedUser = userService.updateAddress(request);
@@ -184,10 +182,28 @@ public class AuthController {
         }
     }
 
-    @PutMapping("/user/add-address")
+    @PostMapping("/user/add-address")
     public ResponseEntity<ApiResponse<UserDetailsDTO>> addAddress(@RequestBody AddAddressRequestDTO request) {
         try {
             UserDetailsDTO updatedUser = addressService.addAddressToUser(request.getUserId(), request.getAddress());
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Address added successfully", updatedUser));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    e.getMessage(),
+                    null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An unexpected error occurred"));
+        }
+    }
+
+    @DeleteMapping("/user/delete-address")
+    public ResponseEntity<ApiResponse<UserDetailsDTO>> deleteAddress( @RequestParam String userId,
+                                                                      @RequestParam String addressId) {
+        try {
+            UserDetailsDTO updatedUser = addressService.deleteAddressFromUser(userId, addressId);
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Address added successfully", updatedUser));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.ok(new ApiResponse<>(

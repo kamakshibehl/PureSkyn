@@ -37,8 +37,11 @@ public class QueryController {
             Query updatedQuery = queryService.updateQueryStatus(queryId, status);
             return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Query status updated", updatedQuery));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(ApiResponseStatus.FAIL, "Query not found"));
+            return ResponseEntity.ok(new ApiResponse<>(
+                    ApiResponseStatus.FAIL,
+                    "Query not found.",
+                    null
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred while updating query status"));
@@ -69,7 +72,11 @@ public class QueryController {
 
     @GetMapping("/statuses")
     public ResponseEntity<ApiResponse<List<QueryStatus>>> getAllQueryStatuses() {
-        return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Query statuses fetched", Arrays.asList(QueryStatus.values())));
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(ApiResponseStatus.SUCCESS, "Query statuses fetched", Arrays.asList(QueryStatus.values())));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(ApiResponseStatus.ERROR, "An error occurred while fetching queries"));
+        }
     }
-
 }

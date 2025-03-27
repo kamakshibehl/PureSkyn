@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,8 +55,9 @@ public class AuthService {
         user.setName(userSignUpDTO.getName());
         user.setPhone(userSignUpDTO.getPhone());
         user.setGender(userSignUpDTO.getGender());
+        user.setRole("ROLE_USER");
 
-        userRepo.save(user);
+        user = userRepo.save(user);
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
         String jwt = jwtUtils.generateToken(userDetails);
@@ -66,6 +68,7 @@ public class AuthService {
                 user.getName(),
                 user.getPhone(),
                 user.getGender(),
+                user.getRole(),
                 jwt
         );
     }
@@ -81,12 +84,18 @@ public class AuthService {
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
         String jwt = jwtUtils.generateToken(userDetails);
 
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_USER");
+
         return new UserLoginDTO(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
                 user.getPhone(),
                 user.getGender(),
+                role,
                 jwt
         );
     }
