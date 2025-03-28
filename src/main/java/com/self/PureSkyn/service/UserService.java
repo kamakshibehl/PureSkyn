@@ -1,14 +1,13 @@
 package com.self.PureSkyn.service;
 
 import com.self.PureSkyn.Model.*;
-import com.self.PureSkyn.exception.ResourceNotFoundException;
+import com.self.PureSkyn.Model.request.AddressUpdateRequestDTO;
+import com.self.PureSkyn.Model.response.BookingDTO;
 import com.self.PureSkyn.repository.UserRepo;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

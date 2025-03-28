@@ -15,7 +15,6 @@ import java.util.List;
 @Document(collection = "services")
 public class Facility {
     @Id
-    private String id;
     private String serviceId;
     private String treatmentName;
     private String packageName;

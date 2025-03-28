@@ -1,5 +1,6 @@
 package com.self.PureSkyn.Model;
 
+import com.self.PureSkyn.Model.response.BookingDTO;
 import lombok.Data;
 import lombok.Getter;
 

@@ -1,13 +1,12 @@
 package com.self.PureSkyn.service;
 
 import com.self.PureSkyn.Model.*;
+import com.self.PureSkyn.Model.response.BookingDTO;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.AddressRepo;
 import com.self.PureSkyn.repository.UserRepo;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

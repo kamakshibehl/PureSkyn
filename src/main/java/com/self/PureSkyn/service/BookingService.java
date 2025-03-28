@@ -1,17 +1,18 @@
 package com.self.PureSkyn.service;
 
+import com.razorpay.Order;
 import com.self.PureSkyn.Model.*;
-import com.self.PureSkyn.exception.BadRequestException;
-import com.self.PureSkyn.exception.ResourceNotFoundException;
+import com.self.PureSkyn.Model.request.BookingRequest;
+import com.self.PureSkyn.Model.request.BookingServiceInfoDTO;
+import com.self.PureSkyn.Model.response.BookingDTO;
 import com.self.PureSkyn.repository.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BookingService {
@@ -41,6 +42,37 @@ public class BookingService {
 
     @Autowired
     private FacilityRepo facilityRepo;
+
+    @Autowired
+    private SessionRepo sessionRepo;
+
+    @Autowired
+    private PaymentService paymentService;
+
+//    private final List<Facility>
+    private final Map<String, Integer> subserviceToSessions = new HashMap<>();
+
+    BookingService(FacilityRepo facilityRepo) {
+//        subserviceToSessions = new HashMap<>();
+
+        List<Facility> facilities = facilityRepo.findAll();
+        for(Facility facility: facilities) {
+            for (FacilityTypes facilityTypes: facility.getTypes()) {
+                subserviceToSessions.put(facilityTypes.getSubServiceId(), facilityTypes.getNoOfSessions());
+            }
+        }
+
+    }
+
+//    @PostConstruct
+//    public void initSubserviceSessions() {
+//        List<Facility> facilities = facilityRepo.findAll();
+//        for (Facility facility : facilities) {
+//            for (FacilityTypes facilityTypes : facility.getTypes()) {
+//                subserviceToSessions.put(facilityTypes.getSubServiceId(), facilityTypes.getNoOfSessions());
+//            }
+//        }
+//    }
 
 
 //    public BookingRequestResponseDTO requestBooking(String id, String serviceId, LocalDate date) {
@@ -75,17 +107,33 @@ public class BookingService {
 //        return new BookingRequestResponseDTO(priceDetails, availableTimeSlots);
 //    }
 
-    public BookingDTO createBooking(Booking bookingRequest) {
-        if (bookingRequest.getUserInfo().getTreatmentDate() == null || bookingRequest.getUserInfo().getTimeSlot() == null) {
-            throw new BadRequestException("Date and timeSlot must be specified");
-        }
+    public BookingDTO createBooking(BookingRequest bookingRequest) {
+
         Booking booking = new Booking();
-        booking.setTechnicianId(bookingRequest.getTechnicianId());
-        booking.setUserInfo(bookingRequest.getUserInfo());
+        booking.setUserId(bookingRequest.getUserId());
+        booking.setBeneficiary(bookingRequest.getBeneficiary());
         booking.setServicesBooked(bookingRequest.getServicesBooked());
-        booking.setPayment(bookingRequest.getPayment());
+        booking.setPaymentId(booking.getPaymentId());
         booking.setCreatedAt(LocalDateTime.now());
         booking.setStatus(BookingStatus.PENDING);
+
+        List<BookingServiceInfoDTO> services =  booking.getServicesBooked();
+        for(BookingServiceInfoDTO service: services) {
+
+            int noOfSessions = subserviceToSessions.getOrDefault(service.getSubServiceId(), 1);
+
+            List<Session> sessions = new ArrayList<>();
+            for (int i=0; i<noOfSessions; i++) {
+                Session session = new Session();
+                if(i == 0) {
+                    session.setDate(service.getDate());
+                    session.setTime(service.getTime());
+                }
+                sessions.add(sessionRepo.save(session));
+            }
+
+            service.setSessions(sessions);
+        }
 
         return convertToBookingDTO(bookingRepo.save(booking));
     }
@@ -131,18 +179,22 @@ public class BookingService {
     }
 
     public List<BookingDTO> getBookingsByDate(LocalDate date) {
-        List<Booking> bookings = bookingRepo.findByUserInfo_TreatmentDate(date);
+//        List<Booking> bookings = bookingRepo.findByBeneficiary_TreatmentDate(date);
+        List<Booking> bookings = new ArrayList<>();
         return bookings.stream()
                 .map(this::convertToBookingDTO)
                 .toList();
     }
 
     public List<BookingDTO> getAllBookingsInDescOrder() {
-        List<Booking> bookings = bookingRepo.findAllByOrderByUserInfo_TreatmentDateDesc();
+//        List<Booking> bookings = bookingRepo.findAllByOrderByUserInfo_TreatmentDateDesc();
+        List<Booking> bookings = new ArrayList<>();
         return bookings.stream().map(this::convertToBookingDTO).toList();
     }
 
     private BookingDTO convertToBookingDTO(Booking booking) {
+        Payment payment = paymentService.getPaymentDetail(booking.getPaymentId()).orElseThrow();
+
         BookingDTO dto = new BookingDTO();
         dto.setBookingId(booking.getId());
         dto.setUserId(booking.getUserId());
@@ -154,10 +206,10 @@ public class BookingService {
                         .orElse("Unknown Technician")
                         : "Not Assigned"
         );
-        dto.setUserInfo(booking.getUserInfo());
+        dto.setUserInfo(booking.getBeneficiary());
         dto.setServicesBooked(booking.getServicesBooked());
 
-        dto.setPayment(booking.getPayment());
+        dto.setPayment(payment);
         dto.setStatus(booking.getStatus());
         dto.setCreatedAt(booking.getCreatedAt());
 

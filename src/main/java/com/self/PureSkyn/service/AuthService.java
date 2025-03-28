@@ -1,6 +1,6 @@
 package com.self.PureSkyn.service;
 
-import com.self.PureSkyn.Model.LoginRequestDTO;
+import com.self.PureSkyn.Model.request.LoginRequestDTO;
 import com.self.PureSkyn.Model.User;
 import com.self.PureSkyn.Model.UserLoginDTO;
 import com.self.PureSkyn.Model.UserSignUpDTO;
@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

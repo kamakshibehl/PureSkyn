@@ -1,7 +1,7 @@
 package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.*;
-import com.self.PureSkyn.exception.BadRequestException;
+import com.self.PureSkyn.Model.request.LoginRequestDTO;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.AdminRepo;
 import com.self.PureSkyn.service.AdminService;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

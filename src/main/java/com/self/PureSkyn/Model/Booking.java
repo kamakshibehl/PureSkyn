@@ -1,6 +1,6 @@
 package com.self.PureSkyn.Model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.self.PureSkyn.Model.request.BookingServiceInfoDTO;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,9 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -23,76 +21,12 @@ public class Booking {
     private String userId;
     private String technicianId;
 
-    private BookingUserInfoDTO userInfo;
+    private Beneficiary beneficiary;
     private List<BookingServiceInfoDTO> servicesBooked;
 
-    private Payment payment;
+    private String paymentId;
     private BookingStatus status;
 
     @CreatedDate
     private LocalDateTime createdAt;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getTechnicianId() {
-        return technicianId;
-    }
-
-    public void setTechnicianId(String technicianId) {
-        this.technicianId = technicianId;
-    }
-
-    public BookingUserInfoDTO getUserInfo() {
-        return userInfo;
-    }
-
-    public void setUserInfo(BookingUserInfoDTO userInfo) {
-        this.userInfo = userInfo;
-    }
-
-    public List<BookingServiceInfoDTO> getServicesBooked() {
-        return servicesBooked;
-    }
-
-    public void setServicesBooked(List<BookingServiceInfoDTO> servicesBooked) {
-        this.servicesBooked = servicesBooked;
-    }
-
-    public Payment getPayment() {
-        return payment;
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
-
-    public BookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BookingStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }

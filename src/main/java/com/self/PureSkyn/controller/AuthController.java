@@ -1,6 +1,9 @@
 package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.*;
+import com.self.PureSkyn.Model.request.AddAddressRequestDTO;
+import com.self.PureSkyn.Model.request.AddressUpdateRequestDTO;
+import com.self.PureSkyn.Model.request.LoginRequestDTO;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import com.self.PureSkyn.repository.UserRepo;
 import com.self.PureSkyn.security.JwtUtils;
@@ -11,14 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")

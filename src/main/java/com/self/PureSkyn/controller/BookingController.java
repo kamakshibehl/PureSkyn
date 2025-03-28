@@ -1,6 +1,8 @@
 package com.self.PureSkyn.controller;
 
 import com.self.PureSkyn.Model.*;
+import com.self.PureSkyn.Model.request.BookingRequest;
+import com.self.PureSkyn.Model.response.BookingDTO;
 import com.self.PureSkyn.exception.BadRequestException;
 import com.self.PureSkyn.exception.ResourceNotFoundException;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -103,8 +104,10 @@ public class BookingController {
 //        }
 //    }
 
+
+
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<BookingDTO>> createBooking(@RequestBody Booking bookingRequest) {
+    public ResponseEntity<ApiResponse<BookingDTO>> createBooking(@RequestBody BookingRequest bookingRequest) {
         try {
             BookingDTO createdBooking = bookingService.createBooking(bookingRequest);
             return ResponseEntity.status(HttpStatus.CREATED)

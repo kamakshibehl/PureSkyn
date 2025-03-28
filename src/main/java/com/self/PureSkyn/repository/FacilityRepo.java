@@ -6,5 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface FacilityRepo extends MongoRepository<Facility, String> {
-
+    @Override
+    Optional<Facility> findById(String serviceId);
 }

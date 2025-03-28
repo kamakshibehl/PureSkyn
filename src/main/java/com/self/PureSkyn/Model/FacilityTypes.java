@@ -19,4 +19,5 @@ public class FacilityTypes {
     private String featureName;
     private String selectedPackageImg;
     private String duration;
+    private int noOfSessions;
 }
